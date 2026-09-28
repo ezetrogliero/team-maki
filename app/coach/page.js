@@ -1,9 +1,13 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
+import { hoyFecha } from '@/lib/fecha';
 
 export default async function CoachHome() {
   const { user, profile } = await requireUser();
   if (profile?.rol !== 'coach') redirect('/alumno');
+
+  const hoy = hoyFecha();
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: 24 }}>
@@ -45,18 +49,46 @@ export default async function CoachHome() {
             border: '1px solid var(--line)',
             borderRadius: 14,
             padding: 24,
+            marginBottom: 16,
           }}
         >
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>
-            Sesión de coach activa
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 700 }}>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>Sesión de coach</p>
+          <p style={{ margin: '4px 0 16px', fontSize: 18, fontWeight: 700 }}>
             {profile?.nombre || user.email}
           </p>
-          <p style={{ marginTop: 16, fontSize: 14, color: 'var(--muted)' }}>
-            El login ya funciona de punta a punta. Acá va a ir el panel para programar el
-            día, ver resultados y el ranking de los alumnos.
+
+          <Link
+            href={`/coach/dia/${hoy}`}
+            style={{
+              display: 'inline-block',
+              padding: '12px 20px',
+              borderRadius: 8,
+              background: 'var(--ink)',
+              color: 'var(--ink-inv)',
+              fontWeight: 700,
+              fontSize: 15,
+              textDecoration: 'none',
+            }}
+          >
+            Programar el día de hoy →
+          </Link>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 14,
+            padding: 20,
+          }}
+        >
+          <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700 }}>Alumnos</p>
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--muted)' }}>
+            Ver y renombrar a los alumnos que ya entraron a la app.
           </p>
+          <Link href="/coach/alumnos" style={{ fontSize: 14, color: 'var(--blue)', fontWeight: 600 }}>
+            Ir al listado →
+          </Link>
         </div>
       </div>
     </main>
