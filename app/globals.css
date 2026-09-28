@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./fonts.css";
 
 :root {
   --bg: #F1ECDF;
@@ -16,8 +17,22 @@
   --ink-inv: #F1ECDF;
   --gold: #D9A62B;
   --display: "Staatliches", system-ui, sans-serif;
-  --body: "Barlow", system-ui, sans-serif;
-  --mono: "Martian Mono", monospace;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Martian Mono", "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #17140F; --surface: #211C14; --surface2: #2A2318; --ink: #F1ECDF; --muted: #B4A98F; --line: #3A331F;
+    --red: #D9614A; --blue: #4FA3A3; --yellow: #E6BD55; --green: #86A860; --good: #86A860; --warn: #E6BD55; --ink-inv: #17140F; --gold: #E6BD55;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #17140F; --surface: #211C14; --surface2: #2A2318; --ink: #F1ECDF; --muted: #B4A98F; --line: #3A331F;
+  --red: #D9614A; --blue: #4FA3A3; --yellow: #E6BD55; --green: #86A860; --good: #86A860; --warn: #E6BD55; --ink-inv: #17140F; --gold: #E6BD55;
 }
 
 * { box-sizing: border-box; }
@@ -26,8 +41,34 @@ html, body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   margin: 0;
   padding: 0;
 }
 
+button, input, select, textarea { font: inherit; color: inherit; }
+
 a { color: inherit; }
+
+.brand { display: flex; align-items: center; gap: 10px; }
+
+.brandmark {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px var(--gold);
+  display: block;
+}
+
+.logo {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: .02em;
+  margin: 0;
+}
+
+.logo span { color: var(--gold); }

@@ -3,6 +3,7 @@ import './globals.css';
 export const metadata = {
   title: 'Team Maki',
   description: 'Programación y seguimiento de entrenamientos — Team Maki',
+  icons: { icon: '/logo.png' },
 };
 
 export default function RootLayout({ children }) {

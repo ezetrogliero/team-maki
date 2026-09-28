@@ -50,16 +50,12 @@ export default function LoginPage() {
           padding: 32,
         }}
       >
-        <h1
-          style={{
-            fontFamily: 'var(--display)',
-            fontSize: 32,
-            margin: '0 0 4px',
-            letterSpacing: '.02em',
-          }}
-        >
-          TEAM <span style={{ color: 'var(--gold)' }}>MAKI</span>
-        </h1>
+        <div className="brand" style={{ marginBottom: 4 }}>
+          <img src="/logo.png" alt="Team Maki" className="brandmark" />
+          <h1 className="logo">
+            TEAM <span>MAKI</span>
+          </h1>
+        </div>
         <p style={{ color: 'var(--muted)', margin: '0 0 24px', fontSize: 14 }}>
           Ingresá con tu email. Te mandamos un link para entrar, sin contraseña.
         </p>

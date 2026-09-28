@@ -16,9 +16,12 @@ export default async function AlumnoHome() {
             marginBottom: 24,
           }}
         >
-          <h1 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0 }}>
-            TEAM <span style={{ color: 'var(--gold)' }}>MAKI</span>
-          </h1>
+          <div className="brand">
+            <img src="/logo.png" alt="Team Maki" className="brandmark" />
+            <h1 className="logo" style={{ fontSize: 24 }}>
+              TEAM <span>MAKI</span>
+            </h1>
+          </div>
           <form action="/logout" method="post">
             <button
               type="submit"
