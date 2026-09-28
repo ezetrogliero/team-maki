@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { sumarDias, hoyFecha } from '@/lib/fecha';
 import DayEditor from '@/components/DayEditor';
+import WeekStrip from '@/components/WeekStrip';
 
 export default async function EditarDia({ params }) {
   const { fecha } = await params;
@@ -29,14 +29,12 @@ export default async function EditarDia({ params }) {
             ← Volver
           </Link>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <Link href={`/coach/dia/${sumarDias(fecha, -1)}`} style={{ fontSize: 13, color: 'var(--muted)' }}>← Anterior</Link>
-          <h1 style={{ fontFamily: 'var(--display)', fontSize: 26, margin: 0 }}>
-            {fecha}{fecha === hoyFecha() ? ' · HOY' : ''}
-          </h1>
-          <Link href={`/coach/dia/${sumarDias(fecha, 1)}`} style={{ fontSize: 13, color: 'var(--muted)' }}>Siguiente →</Link>
-        </div>
-        <p style={{ color: 'var(--muted)', fontSize: 14, margin: '8px 0 20px', textAlign: 'center' }}>
+        <WeekStrip fecha={fecha} basePath="/coach/dia" />
+
+        <h1 style={{ fontFamily: 'var(--display)', fontSize: 24, margin: '0 0 4px', textAlign: 'center' }}>
+          {fecha}
+        </h1>
+        <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 20px', textAlign: 'center' }}>
           {dia ? 'Ya hay una programación para este día. La podés editar.' : 'Todavía no hay nada cargado para este día.'}
         </p>
         <DayEditor fecha={fecha} initial={initial} />

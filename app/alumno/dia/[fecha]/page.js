@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { sumarDias, hoyFecha } from '@/lib/fecha';
 import DayView from '@/components/DayView';
 import ResultForm from '@/components/ResultForm';
+import WeekStrip from '@/components/WeekStrip';
 
 export default async function AlumnoDia({ params }) {
   const { fecha } = await params;
@@ -28,10 +28,6 @@ export default async function AlumnoDia({ params }) {
       .maybeSingle();
     miResultado = data?.wod || null;
   }
-
-  const hoy = hoyFecha();
-  const anterior = sumarDias(fecha, -1);
-  const siguiente = sumarDias(fecha, 1);
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: 24 }}>
@@ -67,14 +63,9 @@ export default async function AlumnoDia({ params }) {
           </form>
         </header>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Link href={`/alumno/dia/${anterior}`} style={{ fontSize: 14, color: 'var(--muted)' }}>← Anterior</Link>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>{fecha}</div>
-            {fecha === hoy && <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>HOY</div>}
-          </div>
-          <Link href={`/alumno/dia/${siguiente}`} style={{ fontSize: 14, color: 'var(--muted)' }}>Siguiente →</Link>
-        </div>
+        <WeekStrip fecha={fecha} basePath="/alumno/dia" />
+
+        <p style={{ textAlign: 'center', fontWeight: 700, fontSize: 15, margin: '-8px 0 16px' }}>{fecha}</p>
 
         <DayView contenido={dia?.contenido} nota={dia?.nota_coach} />
 
