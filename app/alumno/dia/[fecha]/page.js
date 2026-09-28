@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { sumarDias, hoyFecha } from '@/lib/fecha';
 import DayView from '@/components/DayView';
+import ResultForm from '@/components/ResultForm';
 
 export default async function AlumnoDia({ params }) {
   const { fecha } = await params;
@@ -13,9 +14,20 @@ export default async function AlumnoDia({ params }) {
   const supabase = await createClient();
   const { data: dia } = await supabase
     .from('dias')
-    .select('contenido, nota_coach')
+    .select('id, contenido, nota_coach')
     .eq('fecha', fecha)
     .maybeSingle();
+
+  let miResultado = null;
+  if (dia) {
+    const { data } = await supabase
+      .from('resultados')
+      .select('wod')
+      .eq('dia_id', dia.id)
+      .eq('alumno_id', user.id)
+      .maybeSingle();
+    miResultado = data?.wod || null;
+  }
 
   const hoy = hoyFecha();
   const anterior = sumarDias(fecha, -1);
@@ -65,6 +77,29 @@ export default async function AlumnoDia({ params }) {
         </div>
 
         <DayView contenido={dia?.contenido} nota={dia?.nota_coach} />
+
+        {dia?.contenido?.wods?.length > 0 && (
+          <ResultForm fecha={fecha} wods={dia.contenido.wods} existente={miResultado} />
+        )}
+
+        {dia && (
+          <Link
+            href={`/ranking/${fecha}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              padding: '12px 16px',
+              borderRadius: 10,
+              border: '1px solid var(--line)',
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: 'none',
+              color: 'var(--ink)',
+            }}
+          >
+            Ver ranking del día →
+          </Link>
+        )}
       </div>
     </main>
   );

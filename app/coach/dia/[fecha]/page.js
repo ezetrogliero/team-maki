@@ -40,6 +40,26 @@ export default async function EditarDia({ params }) {
           {dia ? 'Ya hay una programación para este día. La podés editar.' : 'Todavía no hay nada cargado para este día.'}
         </p>
         <DayEditor fecha={fecha} initial={initial} />
+
+        {dia && (
+          <Link
+            href={`/ranking/${fecha}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              padding: '12px 16px',
+              borderRadius: 10,
+              border: '1px solid var(--line)',
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: 'none',
+              color: 'var(--ink)',
+              marginTop: 16,
+            }}
+          >
+            Ver ranking / resultados de este día →
+          </Link>
+        )}
       </div>
     </main>
   );
