@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #F1ECDF;
+  --surface: #FBF9F2;
+  --surface2: #E8E1CD;
+  --ink: #17140F;
+  --muted: #7A705A;
+  --line: #DBD3B9;
+  --red: #B4432E;
+  --blue: #2B6E6E;
+  --yellow: #D9A62B;
+  --green: #5C7A44;
+  --good: #5C7A44;
+  --warn: #B4841E;
+  --ink-inv: #F1ECDF;
+  --gold: #D9A62B;
+  --display: "Staatliches", system-ui, sans-serif;
+  --body: "Barlow", system-ui, sans-serif;
+  --mono: "Martian Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  margin: 0;
+  padding: 0;
+}
+
+a { color: inherit; }
