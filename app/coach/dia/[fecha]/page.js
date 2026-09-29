@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import DayEditor from '@/components/DayEditor';
+import CoachDayScreen from '@/components/CoachDayScreen';
 import WeekStrip from '@/components/WeekStrip';
 import Header from '@/components/Header';
 
@@ -18,10 +18,6 @@ export default async function EditarDia({ params }) {
     .eq('fecha', fecha)
     .maybeSingle();
 
-  const initial = dia
-    ? { ...dia.contenido, nota: dia.nota_coach || '' }
-    : null;
-
   return (
     <div className="shell">
       <Header />
@@ -30,12 +26,9 @@ export default async function EditarDia({ params }) {
 
       <div className="phead" style={{ justifyContent: 'center', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <h2>{fecha}</h2>
-        <p className="small muted" style={{ margin: 0 }}>
-          {dia ? 'Ya hay una programación para este día. La podés editar.' : 'Todavía no hay nada cargado para este día.'}
-        </p>
       </div>
 
-      <DayEditor fecha={fecha} initial={initial} />
+      <CoachDayScreen fecha={fecha} contenido={dia?.contenido || null} notaCoach={dia?.nota_coach || ''} />
 
       {dia && (
         <Link href={`/ranking/${fecha}`} className="btn ghost full">

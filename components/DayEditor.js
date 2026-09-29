@@ -225,7 +225,7 @@ function WodsBlock({ wods, onChange }) {
   );
 }
 
-export default function DayEditor({ fecha, initial }) {
+export default function DayEditor({ fecha, initial, onSaved }) {
   const [data, setData] = useState(
     initial || {
       core: TPL.core(),
@@ -242,7 +242,12 @@ export default function DayEditor({ fecha, initial }) {
     startTransition(async () => {
       setMsg('');
       const res = await saveDia(fecha, data);
-      setMsg(res.error ? `Error: ${res.error}` : 'Guardado.');
+      if (res.error) {
+        setMsg(`Error: ${res.error}`);
+        return;
+      }
+      setMsg('Guardado.');
+      onSaved?.();
     });
   }
 
