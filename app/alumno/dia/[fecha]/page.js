@@ -30,13 +30,22 @@ export default async function AlumnoDia({ params }) {
     miResultado = data?.wod || null;
   }
 
+  let misRMs = {};
+  if (dia?.contenido?.fuerza?.length > 0) {
+    const { data: rms } = await supabase
+      .from('rms')
+      .select('lift, valor_kg')
+      .eq('alumno_id', user.id);
+    misRMs = Object.fromEntries((rms || []).map((r) => [r.lift, Number(r.valor_kg)]));
+  }
+
   return (
     <div className="shell">
       <Header />
       <WeekStrip fecha={fecha} basePath="/alumno/dia" />
       <p className="sub" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>{fecha}</p>
 
-      <DayView contenido={dia?.contenido} nota={dia?.nota_coach} />
+      <DayView contenido={dia?.contenido} nota={dia?.nota_coach} modo="alumno" misRMs={misRMs} fecha={fecha} />
 
       {dia?.contenido?.wods?.length > 0 && (
         <ResultForm fecha={fecha} wods={dia.contenido.wods} existente={miResultado} />

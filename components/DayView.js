@@ -1,3 +1,6 @@
+import RMInput from './RMInput';
+import { redondear25, formatoKg, liftDe } from '@/lib/rm';
+
 function BlockHead({ color, name, meta }) {
   return (
     <div className="bh">
@@ -33,34 +36,84 @@ function ListBlock({ color, name, data }) {
   );
 }
 
-function FuerzaBlock({ bloques }) {
+function FuerzaBlock({ bloques, modo, misRMs, fecha }) {
   if (!bloques || bloques.length === 0) return null;
+  const esAlumno = modo === 'alumno';
   return (
     <section className="block">
       <BlockHead color="red" name="Fuerza" />
-      {bloques.map((b, bi) => (
-        <div className="ex" key={bi}>
-          <div className="exh">
-            <h4>{b.name}</h4>
-            {b.rm && <span className="chip rm">RM</span>}
-          </div>
-          <div className="tw">
-            <table>
-              <thead>
-                <tr><th>Series × reps</th><th className="num">Carga</th></tr>
-              </thead>
-              <tbody>
-                {b.sets.map((s, si) => (
-                  <tr key={si}>
-                    <td>{s.s} × {s.r}</td>
-                    <td className="num big">{s.c}{b.unit === '%' ? '%' : ' kg'}</td>
+      {bloques.map((b, bi) => {
+        const lift = liftDe(b);
+        const rm = lift ? misRMs?.[lift] : null;
+        const mostrarTeToca = esAlumno && b.unit === '%';
+
+        let sub = '';
+        if (b.unit === '%') {
+          const base = b.acc ? `del RM de ${lift || '—'}` : 'del RM';
+          sub = esAlumno
+            ? rm != null
+              ? `% ${base} · el tuyo: ${formatoKg(rm)} kg`
+              : `% ${base} · no tenés RM cargado`
+            : `% ${base}`;
+        } else {
+          sub = 'En kilos (hombre/mujer)';
+        }
+
+        return (
+          <div className="ex" key={bi}>
+            <div className="exh">
+              <h4>{b.name}</h4>
+              {b.rm && <span className="chip rm">RM</span>}
+              {b.acc && <span className="chip">Accesorio</span>}
+            </div>
+            <div className="small muted">{sub}</div>
+            <div className="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Series × reps</th>
+                    <th className="num">Carga</th>
+                    {mostrarTeToca && <th className="num">Te toca</th>}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {b.sets.map((s, si) => {
+                    const calc = mostrarTeToca && rm != null ? redondear25((rm * Number(s.c)) / 100) : null;
+                    return (
+                      <tr key={si}>
+                        <td>{s.s} × {s.r}</td>
+                        <td className="num big">{s.c}{b.unit === '%' ? '%' : ' kg'}</td>
+                        {mostrarTeToca && (
+                          <td className="num big">{calc != null ? `${formatoKg(calc)} kg` : '—'}</td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {mostrarTeToca && rm == null && (
+              <p className="small" style={{ margin: 0, color: 'var(--warn)' }}>
+                Todavía no tenés tu RM de {lift || 'este ejercicio'} cargado. Se carga solo el día que sea &quot;Día de RM&quot;.
+              </p>
+            )}
+            {esAlumno && b.rm && lift && (
+              <div className="rmbox">
+                <div>
+                  <div className="small muted">Tu RM actual</div>
+                  <strong>{rm != null ? `${formatoKg(rm)} kg` : 'Sin cargar'}</strong>
+                </div>
+                <RMInput fecha={fecha} lift={lift} />
+              </div>
+            )}
+            {!esAlumno && b.rm && (
+              <div className="rmbox">
+                <span className="small">Día de RM. Si un alumno supera su máximo, se le actualiza solo.</span>
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }
@@ -118,7 +171,7 @@ function WodsBlock({ wods }) {
   );
 }
 
-export default function DayView({ contenido, nota }) {
+export default function DayView({ contenido, nota, modo = 'coach', misRMs, fecha }) {
   if (!contenido) {
     return (
       <div className="empty">
@@ -130,7 +183,7 @@ export default function DayView({ contenido, nota }) {
     <div className="wodexp">
       <ListBlock color="green" name="Core" data={contenido.core} />
       <ListBlock color="yellow" name="Warm up" data={contenido.warm} />
-      <FuerzaBlock bloques={contenido.fuerza} />
+      <FuerzaBlock bloques={contenido.fuerza} modo={modo} misRMs={misRMs} fecha={fecha} />
       <WodsBlock wods={contenido.wods} />
       {nota && (
         <div className="note coachnote">
