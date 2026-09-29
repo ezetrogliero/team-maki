@@ -70,6 +70,19 @@ function wodLabel(w) {
   return `${w.type}${w.time ? ` · ${w.time} ${u}` : ''}`;
 }
 
+function unidadTexto(u) {
+  if (u === 'm') return ' m';
+  if (u === 'cal') return ' cal';
+  if (u === 'seg') return ' seg';
+  return '';
+}
+
+function formatPeso(w) {
+  if (!w) return '';
+  // Si el coach ya escribió la unidad (ej: "40/30 kg"), se respeta tal cual.
+  return /[a-zA-Z]/.test(w) ? w : `${w} kg`;
+}
+
 function WodsBlock({ wods }) {
   if (!wods || wods.length === 0) return null;
   return (
@@ -86,19 +99,16 @@ function WodsBlock({ wods }) {
               {w.bench && <span className="chip rm" style={{ alignSelf: 'flex-start' }}>Benchmark</span>}
               {w.name && <p className="wodname">{w.name}</p>}
               <ul className="wrows">
-                {w.items.map((it, ii) => {
-                  const u = it.u === 'm' ? ' m' : it.u === 'cal' ? ' cal' : '';
-                  return (
-                    <li key={ii}>
-                      <span className="q">
-                        {w.type === 'EMOM' && <small>Min {ii + 1}</small>}
-                        {it.q}{u}
-                      </span>
-                      <span>{it.ex}</span>
-                      <span className="w">{it.w}</span>
-                    </li>
-                  );
-                })}
+                {w.items.map((it, ii) => (
+                  <li key={ii}>
+                    <span className="q">
+                      {w.type === 'EMOM' && <small>Min {ii + 1}</small>}
+                      {it.q}{unidadTexto(it.u)}
+                    </span>
+                    <span>{it.ex}</span>
+                    <span className="w">{formatPeso(it.w)}</span>
+                  </li>
+                ))}
               </ul>
             </section>
           </div>
