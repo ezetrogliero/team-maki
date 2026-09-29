@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/auth';
+import { requireAlumno } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import DayView from '@/components/DayView';
 import ResultForm from '@/components/ResultForm';
@@ -9,8 +8,7 @@ import Header from '@/components/Header';
 
 export default async function AlumnoDia({ params }) {
   const { fecha } = await params;
-  const { user, profile } = await requireUser();
-  if (profile?.rol === 'coach') redirect('/coach');
+  const { user } = await requireAlumno();
 
   const supabase = await createClient();
   const { data: dia } = await supabase

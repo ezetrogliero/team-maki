@@ -3,5 +3,6 @@ import { requireUser } from '@/lib/auth';
 
 export default async function Home() {
   const { profile } = await requireUser();
-  redirect(profile?.rol === 'coach' ? '/coach' : '/alumno');
+  if (profile?.rol === 'coach') redirect('/coach');
+  redirect(profile?.onboarded ? '/alumno' : '/alumno/onboarding');
 }

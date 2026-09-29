@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
@@ -6,6 +7,7 @@ import { ordenarPorScore } from '@/lib/scoring';
 export default async function Ranking({ params }) {
   const { fecha } = await params;
   const { user, profile } = await requireUser();
+  if (profile?.rol !== 'coach' && !profile?.onboarded) redirect('/alumno/onboarding');
 
   const supabase = await createClient();
   const { data: dia } = await supabase

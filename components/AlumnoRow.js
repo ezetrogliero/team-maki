@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { actualizarAlumno } from '@/app/coach/alumnos/actions';
 
 export default function AlumnoRow({ p }) {
@@ -51,6 +52,11 @@ export default function AlumnoRow({ p }) {
         <button type="button" className="btn sm ghost" disabled={pending} onClick={toggleRol}>
           Hacer {p.rol === 'coach' ? 'alumno' : 'coach'}
         </button>
+        {p.rol !== 'coach' && (
+          <Link href={`/coach/alumnos/${p.id}`} className="btn sm ghost">
+            Ver progreso →
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/auth';
+import { requireAlumno } from '@/lib/auth';
 import { hoyFecha } from '@/lib/fecha';
 
 export default async function AlumnoHome() {
-  const { profile } = await requireUser();
-  if (profile?.rol === 'coach') redirect('/coach');
+  await requireAlumno();
   redirect(`/alumno/dia/${hoyFecha()}`);
 }
