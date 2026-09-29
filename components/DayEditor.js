@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { saveDia } from '@/app/coach/dia/actions';
-import { TPL, WOD_TYPES, uid } from './dayEditorHelpers';
+import { TPL, WOD_TYPES, ROUNDS_TYPES, uid } from './dayEditorHelpers';
 
 const box = {
   background: 'var(--surface)',
@@ -31,7 +31,7 @@ const smallBtn = {
 };
 const rmBtn = { ...smallBtn, color: 'var(--red)', borderColor: 'var(--red)' };
 
-function RoundsBlock({ title, data, onChange }) {
+function RoundsBlock({ title, color, data, onChange }) {
   const items = data.items || [];
   function setItem(i, patch) {
     const next = items.map((it, idx) => (idx === i ? { ...it, ...patch } : it));
@@ -45,15 +45,29 @@ function RoundsBlock({ title, data, onChange }) {
   }
   return (
     <div style={box}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ ...label, fontSize: 14 }}>{title}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className={`plate ${color}`} />
+          <span style={{ ...label, fontSize: 14 }}>{title}</span>
+        </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 13, color: 'var(--muted)' }}>Vueltas</span>
-          <input
-            style={{ ...input, width: 56 }}
-            value={data.rounds}
-            onChange={(e) => onChange({ ...data, rounds: e.target.value })}
-          />
+          <select
+            style={{ ...input, width: 'auto' }}
+            value={data.type || 'Rounds'}
+            onChange={(e) => onChange({ ...data, type: e.target.value })}
+          >
+            {ROUNDS_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+          {(data.type || 'Rounds') === 'Rounds' && (
+            <>
+              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Vueltas</span>
+              <input
+                style={{ ...input, width: 56 }}
+                value={data.rounds}
+                onChange={(e) => onChange({ ...data, rounds: e.target.value })}
+              />
+            </>
+          )}
         </div>
       </div>
       {items.map((it, i) => (
@@ -104,7 +118,10 @@ function FuerzaBlock({ bloques, onChange }) {
 
   return (
     <div style={box}>
-      <div style={{ ...label, fontSize: 14, marginBottom: 10 }}>Fuerza</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <span className="plate red" />
+        <span style={{ ...label, fontSize: 14 }}>Fuerza</span>
+      </div>
       {bloques.map((b, bi) => (
         <div key={bi} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 12, marginBottom: 10 }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -124,6 +141,10 @@ function FuerzaBlock({ bloques, onChange }) {
             </select>
             <button type="button" style={rmBtn} onClick={() => delBloque(bi)}>×</button>
           </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, marginBottom: 8 }}>
+            <input type="checkbox" checked={!!b.rm} onChange={(e) => setBloque(bi, { rm: e.target.checked })} />
+            Día de RM (si el alumno supera su máximo, se le actualiza solo)
+          </label>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Series / Reps / Carga</div>
           {b.sets.map((s, si) => (
             <div key={si} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
@@ -169,7 +190,10 @@ function WodsBlock({ wods, onChange }) {
 
   return (
     <div style={box}>
-      <div style={{ ...label, fontSize: 14, marginBottom: 10 }}>WOD{wods.length > 1 ? 'S' : ''}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <span className="plate blue" />
+        <span style={{ ...label, fontSize: 14 }}>WOD{wods.length > 1 ? 'S' : ''}</span>
+      </div>
       {wods.map((w, wi) => (
         <div key={wi} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 12, marginBottom: 10 }}>
           {wi > 0 && (
@@ -197,16 +221,31 @@ function WodsBlock({ wods, onChange }) {
             )}
           </div>
           {w.items.map((it, ii) => (
-            <div key={ii} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-              <input style={{ ...input, maxWidth: 70 }} placeholder="Cant." value={it.q} onChange={(e) => setItem(wi, ii, { q: e.target.value })} />
-              <select style={{ ...input, maxWidth: 90 }} value={it.u} onChange={(e) => setItem(wi, ii, { u: e.target.value })}>
-                <option value="reps">reps</option>
-                <option value="m">m</option>
-                <option value="cal">cal</option>
-              </select>
-              <input style={input} placeholder="Ejercicio" value={it.ex} onChange={(e) => setItem(wi, ii, { ex: e.target.value })} />
-              <input style={{ ...input, maxWidth: 110 }} placeholder="Peso (op.)" value={it.w} onChange={(e) => setItem(wi, ii, { w: e.target.value })} />
-              <button type="button" style={rmBtn} onClick={() => delItem(wi, ii)}>×</button>
+            <div
+              key={ii}
+              style={{
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: 8,
+                marginBottom: 6,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
+            >
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input style={{ ...input, width: 60, flex: 'none' }} placeholder="Cant." value={it.q} onChange={(e) => setItem(wi, ii, { q: e.target.value })} />
+                <select style={{ ...input, width: 80, flex: 'none' }} value={it.u} onChange={(e) => setItem(wi, ii, { u: e.target.value })}>
+                  <option value="reps">reps</option>
+                  <option value="m">m</option>
+                  <option value="cal">cal</option>
+                </select>
+                <input style={{ ...input, flex: 1, minWidth: 0 }} placeholder="Ejercicio" value={it.ex} onChange={(e) => setItem(wi, ii, { ex: e.target.value })} />
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input style={{ ...input, flex: 1 }} placeholder="Peso (opcional)" value={it.w} onChange={(e) => setItem(wi, ii, { w: e.target.value })} />
+                <button type="button" style={{ ...rmBtn, flex: 'none' }} onClick={() => delItem(wi, ii)}>× Quitar</button>
+              </div>
             </div>
           ))}
           <button type="button" style={smallBtn} onClick={() => addItem(wi)}>+ Agregar movimiento</button>
@@ -240,8 +279,8 @@ export default function DayEditor({ fecha, initial }) {
 
   return (
     <div>
-      <RoundsBlock title="Core" data={data.core} onChange={(core) => setData({ ...data, core })} />
-      <RoundsBlock title="Warm up" data={data.warm} onChange={(warm) => setData({ ...data, warm })} />
+      <RoundsBlock title="Core" color="green" data={data.core} onChange={(core) => setData({ ...data, core })} />
+      <RoundsBlock title="Warm up" color="yellow" data={data.warm} onChange={(warm) => setData({ ...data, warm })} />
       <FuerzaBlock bloques={data.fuerza} onChange={(fuerza) => setData({ ...data, fuerza })} />
       <WodsBlock wods={data.wods} onChange={(wods) => setData({ ...data, wods })} />
 

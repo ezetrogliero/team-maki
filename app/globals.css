@@ -72,3 +72,15 @@ a { color: inherit; }
 }
 
 .logo span { color: var(--gold); }
+
+.plate {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: inset 0 0 0 4px currentColor, inset 0 0 0 6px var(--surface);
+}
+.plate.green { color: var(--green); }
+.plate.yellow { color: var(--yellow); }
+.plate.red { color: var(--red); }
+.plate.blue { color: var(--blue); }

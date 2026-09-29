@@ -5,14 +5,45 @@ const box = {
   padding: 16,
   marginBottom: 16,
 };
-const titleStyle = { fontSize: 13, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 10 };
 const row = { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--line)', fontSize: 14 };
 
-function RoundsView({ title, data }) {
+function BlockHead({ color, title, meta }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      <span className={`plate ${color}`} />
+      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{title}</h3>
+      {meta && (
+        <span
+          style={{
+            marginLeft: 'auto',
+            fontSize: 11,
+            fontWeight: 700,
+            color: 'var(--muted)',
+            background: 'var(--surface2)',
+            borderRadius: 999,
+            padding: '2px 8px',
+          }}
+        >
+          {meta}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function typeMeta(b) {
+  if (b.type === 'Rounds') return `${b.rounds || '?'} rounds`;
+  if (b.type === 'Tabata') return 'Tabata · 8 × 20″/10″';
+  if (b.type === 'Tabata x2') return 'Tabata x2';
+  if (b.type === 'A completar') return 'A completar · sin tiempo';
+  return b.type;
+}
+
+function RoundsView({ title, color, data }) {
   if (!data || !data.items || data.items.length === 0) return null;
   return (
     <div style={box}>
-      <div style={titleStyle}>{title} · {data.rounds} vueltas</div>
+      <BlockHead color={color} title={title} meta={typeMeta(data)} />
       {data.items.map((it, i) => (
         <div key={i} style={{ ...row, borderBottom: i === data.items.length - 1 ? 'none' : row.borderBottom }}>
           <span>{it.ex}</span>
@@ -27,10 +58,26 @@ function FuerzaView({ bloques }) {
   if (!bloques || bloques.length === 0) return null;
   return (
     <div style={box}>
-      <div style={titleStyle}>Fuerza</div>
+      <BlockHead color="red" title="Fuerza" />
       {bloques.map((b, bi) => (
         <div key={bi} style={{ marginBottom: bi === bloques.length - 1 ? 0 : 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{b.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span style={{ fontWeight: 700, fontSize: 14 }}>{b.name}</span>
+            {b.rm && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  background: 'var(--gold)',
+                  borderRadius: 999,
+                  padding: '1px 7px',
+                }}
+              >
+                RM
+              </span>
+            )}
+          </div>
           {b.sets.map((s, si) => (
             <div key={si} style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--muted)' }}>
               {s.s} x {s.r} @ {s.c}{b.unit}
@@ -68,13 +115,27 @@ function WodsView({ wods }) {
             </div>
           )}
           <div style={box}>
-            <div style={titleStyle}>
-              {wods.length > 1 ? `WOD ${wi + 1} · ` : ''}
-              {w.name ? `${w.name} · ` : ''}
-              {w.type}
-              {w.time ? ` · ${w.time} min` : ''}
-              {w.bench ? ' · Benchmark' : ''}
-            </div>
+            <BlockHead
+              color="blue"
+              title={wods.length > 1 ? `WOD ${wi + 1}${w.name ? ` · ${w.name}` : ''}` : w.name || 'WOD'}
+              meta={`${w.type}${w.time ? ` · ${w.time} min` : ''}`}
+            />
+            {w.bench && (
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  background: 'var(--gold)',
+                  borderRadius: 999,
+                  padding: '2px 8px',
+                  marginBottom: 8,
+                }}
+              >
+                BENCHMARK
+              </span>
+            )}
             {w.items.map((it, ii) => (
               <div key={ii} style={{ ...row, borderBottom: ii === w.items.length - 1 ? 'none' : row.borderBottom }}>
                 <span>{it.ex}</span>
@@ -102,13 +163,15 @@ export default function DayView({ contenido, nota }) {
   }
   return (
     <div>
-      <RoundsView title="Core" data={contenido.core} />
-      <RoundsView title="Warm up" data={contenido.warm} />
+      <RoundsView title="Core" color="green" data={contenido.core} />
+      <RoundsView title="Warm up" color="yellow" data={contenido.warm} />
       <FuerzaView bloques={contenido.fuerza} />
       <WodsView wods={contenido.wods} />
       {nota && (
         <div style={{ ...box, background: 'var(--surface2)' }}>
-          <div style={titleStyle}>Nota de la coach</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>
+            Nota de la coach
+          </div>
           <p style={{ margin: 0, fontSize: 14 }}>{nota}</p>
         </div>
       )}
