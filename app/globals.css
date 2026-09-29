@@ -153,6 +153,10 @@ textarea{resize:vertical;min-height:64px;width:100%}
 
 .edsec{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .edrow{display:grid;gap:6px;align-items:center}
+.edrow.two{grid-template-columns:1fr 110px 34px}
+.edrow.set{grid-template-columns:repeat(3,1fr) 34px}
+.edrow.wod{grid-template-columns:70px 78px 1fr 34px}
+.edrow.wod .w2{grid-column:3/4}
 .edrow input,.edrow select,.edfree{width:100%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface2)}
 .x{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:16px;line-height:1}
 .add{align-self:flex-start;border:1px dashed var(--line);background:transparent;border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px}
@@ -166,4 +170,4 @@ textarea{resize:vertical;min-height:64px;width:100%}
 .login h2{margin:0;font-family:var(--display);font-size:30px;letter-spacing:.03em}
 
 #toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--inkInv);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;z-index:60;max-width:calc(100% - 32px)}
-@media (max-width:380px){ .bigv{font-size:28px} }
+@media (max-width:380px){ .edrow.wod{grid-template-columns:60px 70px 1fr 34px} .bigv{font-size:28px} }

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { saveDia } from '@/app/coach/dia/actions';
-import { TPL, WOD_TYPES, ROUNDS_TYPES } from './dayEditorHelpers';
+import { TPL, WOD_TYPES, ROUNDS_TYPES, LIFTS, normalizarFuerza } from './dayEditorHelpers';
 
 function BlockHead({ color, name, children }) {
   return (
@@ -83,48 +83,104 @@ function FuerzaBlock({ bloques, onChange }) {
     const b = bloques[bi];
     setBloque(bi, { sets: b.sets.filter((_, idx) => idx !== si) });
   }
+  function setLift(bi, value) {
+    if (value === '__otro') {
+      setBloque(bi, { acc: true, name: '' });
+    } else {
+      setBloque(bi, { acc: false, name: value, base: '' });
+    }
+  }
 
   return (
     <section className="edsec">
       <BlockHead color="red" name="Fuerza" />
-      {bloques.map((b, bi) => (
-        <div className="fzed" key={bi}>
-          <div className="edrow" style={{ gridTemplateColumns: '1fr 90px 34px' }}>
-            <input
-              value={b.name}
-              onChange={(e) => setBloque(bi, { name: e.target.value })}
-              placeholder="Ejercicio (ej: Push Press)"
-              aria-label="Ejercicio de fuerza"
-            />
-            <select value={b.unit} onChange={(e) => setBloque(bi, { unit: e.target.value })} aria-label="Unidad">
-              <option value="%">% RM</option>
-              <option value="kg">kg</option>
-            </select>
-            <button type="button" className="x" onClick={() => delBloque(bi)} aria-label="Quitar ejercicio">×</button>
-          </div>
-          <label className="check">
-            <input type="checkbox" checked={!!b.rm} onChange={(e) => setBloque(bi, { rm: e.target.checked })} />
-            Día de RM (si el alumno supera su máximo, se le actualiza solo)
-          </label>
-          <div className="colh" style={{ gridTemplateColumns: 'repeat(3,1fr) 34px' }}>
-            <span>Series</span><span>Reps</span><span>{b.unit === '%' ? '% (30–110)' : 'Kg (H/M)'}</span><span></span>
-          </div>
-          {b.sets.map((s, si) => (
-            <div className="edrow set" key={si}>
-              <input value={s.s} onChange={(e) => setSet(bi, si, { s: e.target.value })} aria-label="Series" />
-              <input value={s.r} onChange={(e) => setSet(bi, si, { r: e.target.value })} aria-label="Reps" />
-              <input
-                value={s.c}
-                onChange={(e) => setSet(bi, si, { c: e.target.value })}
-                placeholder={b.unit === '%' ? '70' : '40/30'}
-                aria-label="Carga"
-              />
-              <button type="button" className="x" onClick={() => delSet(bi, si)} aria-label="Quitar serie">×</button>
+      {bloques.map((bRaw, bi) => {
+        const b = normalizarFuerza(bRaw);
+        return (
+          <div className="fzed" key={bi}>
+            <div className="edrow" style={{ gridTemplateColumns: '1fr 34px' }}>
+              <select value={b.acc ? '__otro' : b.name} onChange={(e) => setLift(bi, e.target.value)} aria-label="Ejercicio de fuerza">
+                <option value="" disabled={b.name !== '' || b.acc}>Elegí el ejercicio…</option>
+                <optgroup label="Principales (con RM y progresión)">
+                  {LIFTS.map((l) => <option key={l} value={l}>{l}</option>)}
+                </optgroup>
+                <option value="__otro">Otro (accesorio, lo escribís)</option>
+              </select>
+              <button type="button" className="x" onClick={() => delBloque(bi)} aria-label="Quitar ejercicio">×</button>
             </div>
-          ))}
-          <button type="button" className="add" onClick={() => addSet(bi)}>+ Serie</button>
-        </div>
-      ))}
+
+            {b.acc && (
+              <input
+                className="edfree"
+                value={b.name}
+                onChange={(e) => setBloque(bi, { name: e.target.value })}
+                placeholder="Ej: Hang power clean, remo con mancuerna"
+                aria-label="Nombre del accesorio"
+              />
+            )}
+
+            <div className="inline">
+              {b.acc ? (
+                <>
+                  <label className="field">
+                    Carga en
+                    <select value={b.unit} onChange={(e) => setBloque(bi, { unit: e.target.value })}>
+                      <option value="kg">Kilos</option>
+                      <option value="%">% del RM de…</option>
+                    </select>
+                  </label>
+                  {b.unit === '%' && (
+                    <label className="field">
+                      RM base
+                      <select value={b.base} onChange={(e) => setBloque(bi, { base: e.target.value })}>
+                        <option value="">Elegí…</option>
+                        {LIFTS.map((l) => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                    </label>
+                  )}
+                </>
+              ) : (
+                <>
+                  <label className="field">
+                    Carga en
+                    <select value={b.unit} onChange={(e) => setBloque(bi, { unit: e.target.value })}>
+                      <option value="%">% del RM</option>
+                      <option value="kg">Kilos</option>
+                    </select>
+                  </label>
+                  <label className="check">
+                    <input type="checkbox" checked={!!b.rm} onChange={(e) => setBloque(bi, { rm: e.target.checked })} />
+                    Día de RM
+                  </label>
+                </>
+              )}
+            </div>
+            {b.acc && <span className="small muted">Los accesorios no suman a la progresión.</span>}
+
+            <div className="colh" style={{ gridTemplateColumns: 'repeat(3,1fr) 34px' }}>
+              <span>Series</span><span>Reps</span><span>{b.unit === '%' ? '% (30–110)' : 'Kg (H/M)'}</span><span></span>
+            </div>
+            {b.sets.map((s, si) => (
+              <div className="edrow set" key={si}>
+                <input inputMode="numeric" value={s.s} onChange={(e) => setSet(bi, si, { s: e.target.value })} aria-label="Series" />
+                <input inputMode="numeric" value={s.r} onChange={(e) => setSet(bi, si, { r: e.target.value })} aria-label="Reps" />
+                <input
+                  type={b.unit === '%' ? 'number' : 'text'}
+                  min={b.unit === '%' ? 30 : undefined}
+                  max={b.unit === '%' ? 110 : undefined}
+                  step={b.unit === '%' ? 5 : undefined}
+                  value={s.c}
+                  onChange={(e) => setSet(bi, si, { c: e.target.value })}
+                  placeholder={b.unit === '%' ? '70' : '40/30'}
+                  aria-label="Carga"
+                />
+                <button type="button" className="x" onClick={() => delSet(bi, si)} aria-label="Quitar serie">×</button>
+              </div>
+            ))}
+            <button type="button" className="add" onClick={() => addSet(bi)}>+ Serie</button>
+          </div>
+        );
+      })}
       <button type="button" className="add" onClick={addBloque}>+ Otro ejercicio de fuerza</button>
     </section>
   );
@@ -226,14 +282,16 @@ function WodsBlock({ wods, onChange }) {
 }
 
 export default function DayEditor({ fecha, initial, onSaved }) {
-  const [data, setData] = useState(
-    initial || {
-      core: TPL.core(),
-      warm: TPL.core(),
-      fuerza: [],
-      wods: [TPL.wod()],
-      nota: '',
-    }
+  const [data, setData] = useState(() =>
+    initial
+      ? { ...initial, fuerza: (initial.fuerza || []).map(normalizarFuerza) }
+      : {
+          core: TPL.core(),
+          warm: TPL.core(),
+          fuerza: [],
+          wods: [TPL.wod()],
+          nota: '',
+        }
   );
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState('');
