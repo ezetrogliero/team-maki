@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import DayEditor from '@/components/DayEditor';
 import WeekStrip from '@/components/WeekStrip';
+import Header from '@/components/Header';
 
 export default async function EditarDia({ params }) {
   const { fecha } = await params;
@@ -22,43 +23,25 @@ export default async function EditarDia({ params }) {
     : null;
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: 24 }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <div style={{ marginBottom: 16 }}>
-          <Link href="/coach" style={{ fontSize: 13, color: 'var(--muted)' }}>
-            ← Volver
-          </Link>
-        </div>
-        <WeekStrip fecha={fecha} basePath="/coach/dia" />
+    <div className="shell">
+      <Header />
+      <Link href="/coach" className="back small linkbtn">← Volver</Link>
+      <WeekStrip fecha={fecha} basePath="/coach/dia" />
 
-        <h1 style={{ fontFamily: 'var(--display)', fontSize: 24, margin: '0 0 4px', textAlign: 'center' }}>
-          {fecha}
-        </h1>
-        <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 20px', textAlign: 'center' }}>
+      <div className="phead" style={{ justifyContent: 'center', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <h2>{fecha}</h2>
+        <p className="small muted" style={{ margin: 0 }}>
           {dia ? 'Ya hay una programación para este día. La podés editar.' : 'Todavía no hay nada cargado para este día.'}
         </p>
-        <DayEditor fecha={fecha} initial={initial} />
-
-        {dia && (
-          <Link
-            href={`/ranking/${fecha}`}
-            style={{
-              display: 'block',
-              textAlign: 'center',
-              padding: '12px 16px',
-              borderRadius: 10,
-              border: '1px solid var(--line)',
-              fontSize: 14,
-              fontWeight: 600,
-              textDecoration: 'none',
-              color: 'var(--ink)',
-              marginTop: 16,
-            }}
-          >
-            Ver ranking / resultados de este día →
-          </Link>
-        )}
       </div>
-    </main>
+
+      <DayEditor fecha={fecha} initial={initial} />
+
+      {dia && (
+        <Link href={`/ranking/${fecha}`} className="btn ghost full">
+          Ver ranking / resultados de este día →
+        </Link>
+      )}
+    </div>
   );
 }

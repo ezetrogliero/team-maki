@@ -35,22 +35,7 @@ export default async function Ranking({ params }) {
     return (
       <Page fecha={fecha} volverHref={volverHref}>
         <Empty texto="Todavía no cargaste tus resultados de hoy. Cargalos primero para desbloquear el ranking del día.">
-          <Link
-            href={volverHref}
-            style={{
-              display: 'inline-block',
-              marginTop: 12,
-              padding: '10px 16px',
-              borderRadius: 8,
-              background: 'var(--ink)',
-              color: 'var(--ink-inv)',
-              fontWeight: 700,
-              fontSize: 14,
-              textDecoration: 'none',
-            }}
-          >
-            Ir a cargar mis resultados
-          </Link>
+          <Link href={volverHref} className="btn">Ir a cargar mis resultados</Link>
         </Empty>
       </Page>
     );
@@ -63,41 +48,26 @@ export default async function Ranking({ params }) {
       {wods.map((w, wi) => {
         const ordenados = ordenarPorScore(resultados || [], wi);
         return (
-          <div
-            key={wi}
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 10 }}>
-              {wods.length > 1 ? `WOD ${wi + 1}` : 'Ranking'}{w.name ? ` · ${w.name}` : ''}
+          <section className="block" key={wi}>
+            <div className="bh">
+              <span className="plate blue" aria-hidden="true" />
+              <h3>{wods.length > 1 ? `WOD ${wi + 1}` : 'Ranking'}</h3>
+              {w.name && <span className="pill">{w.name}</span>}
             </div>
-            {ordenados.length === 0 && (
-              <p style={{ color: 'var(--muted)', fontSize: 14, margin: 0 }}>Todavía nadie cargó este WOD.</p>
+            {ordenados.length === 0 ? (
+              <p className="small muted" style={{ margin: 0 }}>Todavía nadie cargó este WOD.</p>
+            ) : (
+              <ul className="rank">
+                {ordenados.map((r, i) => (
+                  <li key={r.alumno_id} className={`${i === 0 ? 'p1' : i === 1 ? 'p2' : i === 2 ? 'p3' : ''} ${r.alumno_id === user.id ? 'me' : ''}`}>
+                    <span className="pos">{i + 1}°</span>
+                    <span>{r.profiles?.nombre || '—'}</span>
+                    <span className="res">{r.wod[wi]?.texto}</span>
+                  </li>
+                ))}
+              </ul>
             )}
-            {ordenados.map((r, i) => (
-              <div
-                key={r.alumno_id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '8px 0',
-                  borderBottom: i === ordenados.length - 1 ? 'none' : '1px solid var(--line)',
-                  fontWeight: r.alumno_id === user.id ? 700 : 400,
-                }}
-              >
-                <span>
-                  <span style={{ fontFamily: 'var(--mono)', color: 'var(--gold)', marginRight: 8 }}>{i + 1}°</span>
-                  {r.profiles?.nombre || '—'}
-                </span>
-                <span style={{ fontFamily: 'var(--mono)' }}>{r.wod[wi]?.texto}</span>
-              </div>
-            ))}
-          </div>
+          </section>
         );
       })}
     </Page>
@@ -106,24 +76,21 @@ export default async function Ranking({ params }) {
 
 function Page({ fecha, volverHref, children }) {
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: 24 }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <div style={{ marginBottom: 16 }}>
-          <Link href={volverHref} style={{ fontSize: 13, color: 'var(--muted)' }}>← Volver al día</Link>
-        </div>
-        <h1 style={{ fontFamily: 'var(--display)', fontSize: 26, margin: '0 0 20px' }}>
-          Ranking · {fecha}
-        </h1>
-        {children}
+    <div className="shell">
+      <Link href={volverHref} className="back small linkbtn">← Volver al día</Link>
+      <div className="phead">
+        <h2>Ranking</h2>
+        <span className="sub">{fecha}</span>
       </div>
-    </main>
+      {children}
+    </div>
   );
 }
 
 function Empty({ texto, children }) {
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
-      <p style={{ margin: 0, fontSize: 14 }}>{texto}</p>
+    <div className="empty">
+      <span>{texto}</span>
       {children}
     </div>
   );

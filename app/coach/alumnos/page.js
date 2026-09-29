@@ -15,31 +15,24 @@ export default async function Alumnos() {
     .order('nombre');
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: 24 }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <div style={{ marginBottom: 16 }}>
-          <Link href="/coach" style={{ fontSize: 13, color: 'var(--muted)' }}>
-            ← Volver
-          </Link>
-        </div>
-        <h1 style={{ fontFamily: 'var(--display)', fontSize: 26, margin: '0 0 4px' }}>
-          Alumnos
-        </h1>
-        <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 20px' }}>
+    <div className="shell">
+      <Link href="/coach" className="back small linkbtn">← Volver</Link>
+      <div className="phead" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+        <h2>Alumnos</h2>
+        <p className="small muted" style={{ margin: 0 }}>
           Se suman solos a esta lista la primera vez que entran a{' '}
-          <strong>team-maki.vercel.app</strong> con su email. Vos solo tenés que
-          renombrarlos.
+          <strong>team-maki.vercel.app</strong> con su email. Vos solo tenés que renombrarlos.
         </p>
-
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 20 }}>
-          {(!perfiles || perfiles.length === 0) && (
-            <p style={{ color: 'var(--muted)', fontSize: 14 }}>Todavía no entró nadie.</p>
-          )}
-          {perfiles?.map((p) => (
-            <AlumnoRow key={p.id} p={p} />
-          ))}
-        </div>
       </div>
-    </main>
+
+      <div className="alist">
+        {(!perfiles || perfiles.length === 0) && (
+          <p className="small muted">Todavía no entró nadie.</p>
+        )}
+        {perfiles?.map((p) => (
+          <AlumnoRow key={p.id} p={p} />
+        ))}
+      </div>
+    </div>
   );
 }

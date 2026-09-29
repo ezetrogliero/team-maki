@@ -30,59 +30,28 @@ export default function AlumnoRow({ p }) {
     });
   }
 
-  const input = {
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: '1px solid var(--line)',
-    background: 'var(--bg)',
-    color: 'var(--ink)',
-    fontSize: 14,
-  };
-  const btn = {
-    padding: '6px 10px',
-    borderRadius: 6,
-    border: '1px solid var(--line)',
-    background: 'transparent',
-    cursor: 'pointer',
-    fontSize: 13,
-  };
-
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '10px 0',
-        borderBottom: '1px solid var(--line)',
-        opacity: p.activo ? 1 : 0.5,
-        flexWrap: 'wrap',
-      }}
-    >
-      <input style={{ ...input, flex: 1, minWidth: 140 }} value={nombre} onChange={(e) => setNombre(e.target.value)} />
-      <span style={{ fontSize: 13, color: 'var(--muted)', minWidth: 160 }}>{p.email}</span>
-      <span
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          padding: '3px 8px',
-          borderRadius: 999,
-          background: p.rol === 'coach' ? 'var(--gold)' : 'var(--surface2)',
-          color: p.rol === 'coach' ? 'var(--ink)' : 'var(--muted)',
-        }}
-      >
-        {p.rol}
-      </span>
-      <button type="button" style={btn} disabled={pending} onClick={guardarNombre}>
-        {saved ? 'Guardado ✓' : 'Guardar nombre'}
-      </button>
-      <button type="button" style={btn} disabled={pending} onClick={toggleActivo}>
-        {p.activo ? 'Desactivar' : 'Activar'}
-      </button>
-      <button type="button" style={btn} disabled={pending} onClick={toggleRol}>
-        Hacer {p.rol === 'coach' ? 'alumno' : 'coach'}
-      </button>
+    <div className={`arow${p.activo ? '' : ' off'}`}>
+      <div className="n" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <input
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          style={{ flex: 1, minWidth: 100, padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 6, background: 'var(--surface2)' }}
+        />
+        <span className={`chip${p.rol === 'coach' ? ' rm' : ''}`}>{p.rol}</span>
+      </div>
+      <span className="s">{p.email}</span>
+      <div className="s" style={{ gridColumn: '1/-1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+        <button type="button" className="btn sm ghost" disabled={pending} onClick={guardarNombre}>
+          {saved ? 'Guardado ✓' : 'Guardar nombre'}
+        </button>
+        <button type="button" className="btn sm ghost" disabled={pending} onClick={toggleActivo}>
+          {p.activo ? 'Desactivar' : 'Activar'}
+        </button>
+        <button type="button" className="btn sm ghost" disabled={pending} onClick={toggleRol}>
+          Hacer {p.rol === 'coach' ? 'alumno' : 'coach'}
+        </button>
+      </div>
     </div>
   );
 }

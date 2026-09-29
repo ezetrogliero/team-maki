@@ -4,23 +4,6 @@ import { useState, useTransition } from 'react';
 import { guardarResultado } from '@/app/alumno/dia/[fecha]/actions';
 import { esPorTiempo, armarScore, segundosATiempo } from '@/lib/scoring';
 
-const box = {
-  background: 'var(--surface)',
-  border: '1px solid var(--line)',
-  borderRadius: 12,
-  padding: 16,
-  marginBottom: 16,
-};
-const titleStyle = { fontSize: 13, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 10 };
-const input = {
-  padding: '8px 10px',
-  borderRadius: 8,
-  border: '1px solid var(--line)',
-  background: 'var(--bg)',
-  color: 'var(--ink)',
-  fontSize: 14,
-};
-
 export default function ResultForm({ fecha, wods, existente }) {
   const [inputs, setInputs] = useState(() =>
     wods.map((w, wi) => {
@@ -55,70 +38,65 @@ export default function ResultForm({ fecha, wods, existente }) {
   }
 
   return (
-    <div style={box}>
-      <div style={titleStyle}>Cargar mis resultados</div>
+    <section className="block">
+      <div className="bh">
+        <span className="plate blue" aria-hidden="true" />
+        <h3>Cargar mis resultados</h3>
+      </div>
+
       {wods.map((w, wi) => (
-        <div key={wi} style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 13, marginBottom: 6 }}>
+        <div className="score" key={wi} style={{ marginBottom: 10 }}>
+          <span className="small muted" style={{ flexBasis: '100%' }}>
             {wods.length > 1 ? `WOD ${wi + 1}` : 'WOD'}{w.name ? ` · ${w.name}` : ''} ({w.type})
-          </div>
+          </span>
           {esPorTiempo(w.type) ? (
-            <input
-              style={{ ...input, width: 100 }}
-              placeholder="mm:ss"
-              value={inputs[wi].tiempo}
-              onChange={(e) => setInput(wi, { tiempo: e.target.value })}
-            />
+            <label className="field">
+              Tiempo (mm:ss)
+              <input
+                style={{ width: 100 }}
+                placeholder="mm:ss"
+                value={inputs[wi].tiempo}
+                onChange={(e) => setInput(wi, { tiempo: e.target.value })}
+              />
+            </label>
           ) : (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
-                style={{ ...input, width: 70 }}
-                placeholder="Rondas"
-                value={inputs[wi].rondas}
-                onChange={(e) => setInput(wi, { rondas: e.target.value })}
-              />
-              <span style={{ fontSize: 13, color: 'var(--muted)' }}>+</span>
-              <input
-                style={{ ...input, width: 70 }}
-                placeholder="Reps"
-                value={inputs[wi].reps}
-                onChange={(e) => setInput(wi, { reps: e.target.value })}
-              />
-            </div>
+            <>
+              <label className="field">
+                Rondas
+                <input
+                  style={{ width: 70 }}
+                  value={inputs[wi].rondas}
+                  onChange={(e) => setInput(wi, { rondas: e.target.value })}
+                />
+              </label>
+              <label className="field">
+                Reps
+                <input
+                  style={{ width: 70 }}
+                  value={inputs[wi].reps}
+                  onChange={(e) => setInput(wi, { reps: e.target.value })}
+                />
+              </label>
+            </>
           )}
         </div>
       ))}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 13, marginBottom: 6 }}>Nota (opcional)</div>
-        <textarea
-          style={{ ...input, width: '100%', minHeight: 50, resize: 'vertical' }}
-          value={nota}
-          onChange={(e) => setNota(e.target.value)}
-        />
-      </div>
+
+      <label className="field" style={{ marginBottom: 12 }}>
+        Nota (opcional)
+        <textarea value={nota} onChange={(e) => setNota(e.target.value)} style={{ minHeight: 50, resize: 'vertical' }} />
+      </label>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={pending}
-          style={{
-            padding: '10px 18px',
-            borderRadius: 8,
-            border: 'none',
-            background: 'var(--ink)',
-            color: 'var(--ink-inv)',
-            fontWeight: 700,
-            fontSize: 14,
-            cursor: pending ? 'default' : 'pointer',
-            opacity: pending ? 0.7 : 1,
-          }}
-        >
+        <button type="button" className="btn" onClick={handleSubmit} disabled={pending}>
           {pending ? 'Guardando...' : existente ? 'Actualizar resultado' : 'Guardar resultado'}
         </button>
         {msg && (
-          <span style={{ fontSize: 13, color: msg.startsWith('Error') ? 'var(--red)' : 'var(--good)' }}>{msg}</span>
+          <span className="small" style={{ color: msg.startsWith('Error') ? 'var(--red)' : 'var(--good)' }}>
+            {msg}
+          </span>
         )}
       </div>
-    </div>
+    </section>
   );
 }

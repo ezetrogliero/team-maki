@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { semanaDe, sumarDias, nombreDiaCorto, diaDelMes, hoyFecha } from '@/lib/fecha';
+import { semanaDe, sumarDias, diaDelMes, hoyFecha } from '@/lib/fecha';
+
+const DN = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
 
 export default async function WeekStrip({ fecha, basePath }) {
   const dias = semanaDe(fecha);
@@ -18,58 +20,31 @@ export default async function WeekStrip({ fecha, basePath }) {
   const semanaSiguiente = sumarDias(dias[0], 7);
 
   return (
-    <div
-      style={{
-        background: 'var(--surface)',
-        border: '1px solid var(--line)',
-        borderRadius: 12,
-        padding: '12px 8px',
-        marginBottom: 20,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 10px' }}>
-        <Link href={`${basePath}/${semanaAnterior}`} style={{ fontSize: 18, color: 'var(--muted)', textDecoration: 'none' }}>‹</Link>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
-          Semana
-        </span>
-        <Link href={`${basePath}/${semanaSiguiente}`} style={{ fontSize: 18, color: 'var(--muted)', textDecoration: 'none' }}>›</Link>
+    <section className="week">
+      <div className="weekhead">
+        <Link href={`${basePath}/${semanaAnterior}`} className="arrow" aria-label="Semana anterior" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</Link>
+        <h2>Semana</h2>
+        <Link href={`${basePath}/${semanaSiguiente}`} className="arrow" aria-label="Semana siguiente" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</Link>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
-        {dias.map((d) => {
+      <div className="days">
+        {dias.map((d, i) => {
           const activo = d === fecha;
           const esHoy = d === hoy;
           return (
             <Link
               key={d}
               href={`${basePath}/${d}`}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 2,
-                padding: '8px 2px 6px',
-                borderRadius: 8,
-                textDecoration: 'none',
-                background: activo ? 'var(--ink)' : 'transparent',
-                color: activo ? 'var(--ink-inv)' : 'var(--ink)',
-              }}
+              className={`dbtn${conProgramacion.has(d) ? ' has' : ''}`}
+              aria-pressed={activo}
             >
-              <span style={{ fontSize: 10, fontWeight: 700, color: activo ? 'var(--gold)' : 'var(--muted)' }}>
-                {esHoy ? 'HOY' : nombreDiaCorto(d)}
-              </span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 15, fontWeight: 700 }}>{diaDelMes(d)}</span>
-              <span
-                style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: 999,
-                  background: conProgramacion.has(d) ? 'var(--gold)' : 'transparent',
-                }}
-              />
+              {esHoy && <span className="today">Hoy</span>}
+              <span className="dn">{DN[i]}</span>
+              <span className="dd">{diaDelMes(d)}</span>
+              <span className="dot" />
             </Link>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
