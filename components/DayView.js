@@ -92,15 +92,10 @@ function FuerzaBlock({ bloques, modo, misRMs, fecha }) {
                 </tbody>
               </table>
             </div>
-            {mostrarTeToca && rm == null && (
-              <p className="small" style={{ margin: 0, color: 'var(--warn)' }}>
-                Todavía no tenés tu RM de {lift || 'este ejercicio'} cargado. Se carga solo el día que sea &quot;Día de RM&quot;.
-              </p>
-            )}
-            {esAlumno && b.rm && lift && (
+            {esAlumno && lift && (b.rm || rm == null) && (
               <div className="rmbox">
                 <div>
-                  <div className="small muted">Tu RM actual</div>
+                  <div className="small muted">Tu RM actual de {lift}</div>
                   <strong>{rm != null ? `${formatoKg(rm)} kg` : 'Sin cargar'}</strong>
                 </div>
                 <RMInput fecha={fecha} lift={lift} />
