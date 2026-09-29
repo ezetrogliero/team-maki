@@ -20,12 +20,17 @@ export default function OnboardingForm({ nombreInicial }) {
     e.preventDefault();
     startTransition(async () => {
       setMsg('');
-      const res = await completarOnboarding(nombre, rms);
-      if (res.error) {
-        setMsg(`Error: ${res.error}`);
-        return;
+      try {
+        const res = await completarOnboarding(nombre, rms);
+        if (res?.error) {
+          setMsg(res.error);
+          return;
+        }
+        router.push('/alumno');
+      } catch (err) {
+        setMsg('No se pudo guardar. Volvé a intentar en unos segundos.');
+        console.error(err);
       }
-      router.push('/alumno');
     });
   }
 
@@ -72,7 +77,11 @@ export default function OnboardingForm({ nombreInicial }) {
         </div>
       </div>
 
-      {msg && <p className="small" style={{ color: 'var(--red)', margin: 0 }}>{msg}</p>}
+      {msg && (
+        <div className="note" style={{ borderColor: 'var(--red)', color: 'var(--red)', fontWeight: 600 }}>
+          {msg}
+        </div>
+      )}
 
       <button type="submit" className="btn full" disabled={pending}>
         {pending ? 'Guardando...' : 'Empezar'}
