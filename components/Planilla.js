@@ -22,6 +22,7 @@ export default function Planilla({
   benchmarks,
   comentarios,
   cargados,
+  frows = [],
   mostrarComentarios = true,
   coach = false,
   activo = true,
@@ -108,7 +109,18 @@ export default function Planilla({
               </tr>
             </thead>
             <tbody>
-              <tr><td colSpan={4} className="muted">Todavía no se registra el peso levantado en cada serie.</td></tr>
+              {frows.length === 0 ? (
+                <tr><td colSpan={4} className="muted">Sin cargas.</td></tr>
+              ) : (
+                frows.map((f, i) => (
+                  <tr key={i}>
+                    <td>{formatoFecha(f.fecha)}</td>
+                    <td>{f.ejercicio}</td>
+                    <td className="num">{f.series}</td>
+                    <td className="num big">{formatoKg(f.maximo)} kg</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

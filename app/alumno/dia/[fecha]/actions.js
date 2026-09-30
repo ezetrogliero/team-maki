@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-export async function guardarResultado(fecha, scores, nota) {
+export async function guardarResultado(fecha, scores, nota, fuerza) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -22,7 +22,8 @@ export async function guardarResultado(fecha, scores, nota) {
     {
       dia_id: dia.id,
       alumno_id: user.id,
-      wod: scores,
+      wod: scores.length ? scores : null,
+      fuerza: fuerza && Object.keys(fuerza).length ? fuerza : null,
       nota: nota || null,
     },
     { onConflict: 'dia_id,alumno_id' }
@@ -32,6 +33,7 @@ export async function guardarResultado(fecha, scores, nota) {
 
   revalidatePath(`/alumno/dia/${fecha}`);
   revalidatePath(`/ranking/${fecha}`);
+  revalidatePath('/alumno/progreso');
   return { ok: true };
 }
 
