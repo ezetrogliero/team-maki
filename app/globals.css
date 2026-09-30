@@ -12,14 +12,14 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#17140F; --surface:#211C14; --surface2:#2A2318; --ink:#F1ECDF; --muted:#B4A98F; --line:#3A331F;
-    --red:#D9614A; --blue:#4FA3A3; --yellow:#E6BD55; --green:#86A860; --good:#86A860; --warn:#E6BD55; --inkInv:#17140F; --gold:#E6BD55;
+    --bg:#0B0C0F; --surface:#15171D; --surface2:#1D2028; --ink:#F1ECDF; --muted:#9BA2AF; --line:#292D37;
+    --red:#D9614A; --blue:#4FA3A3; --yellow:#E6BD55; --green:#86A860; --good:#86A860; --warn:#E6BD55; --inkInv:#0B0C0F; --gold:#E6BD55;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#17140F; --surface:#211C14; --surface2:#2A2318; --ink:#F1ECDF; --muted:#B4A98F; --line:#3A331F;
-  --red:#D9614A; --blue:#4FA3A3; --yellow:#E6BD55; --green:#86A860; --good:#86A860; --warn:#E6BD55; --inkInv:#17140F; --gold:#E6BD55;
+  --bg:#0B0C0F; --surface:#15171D; --surface2:#1D2028; --ink:#F1ECDF; --muted:#9BA2AF; --line:#292D37;
+  --red:#D9614A; --blue:#4FA3A3; --yellow:#E6BD55; --green:#86A860; --good:#86A860; --warn:#E6BD55; --inkInv:#0B0C0F; --gold:#E6BD55;
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums;margin:0;padding:0}
