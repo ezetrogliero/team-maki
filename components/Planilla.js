@@ -98,6 +98,7 @@ export default function Planilla({
 
       <section className="sect">
         <h3>Fuerza: peso máximo usado</h3>
+        <span className="small muted">Calculado según el % del RM (o el kg fijo) que programó la coach cada día</span>
         <div className="card tw">
           <table>
             <thead>

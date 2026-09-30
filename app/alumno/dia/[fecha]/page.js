@@ -18,17 +18,15 @@ export default async function AlumnoDia({ params }) {
     .maybeSingle();
 
   let miResultado = null;
-  let miFuerzaHecha = null;
   let yoAusente = false;
   if (dia) {
     const { data } = await supabase
       .from('resultados')
-      .select('wod, fuerza, ausente')
+      .select('wod, ausente')
       .eq('dia_id', dia.id)
       .eq('alumno_id', user.id)
       .maybeSingle();
     miResultado = data?.wod || null;
-    miFuerzaHecha = data?.fuerza || null;
     yoAusente = !!data?.ausente;
   }
 
@@ -48,18 +46,12 @@ export default async function AlumnoDia({ params }) {
 
       <DayView contenido={dia?.contenido} nota={dia?.nota_coach} modo="alumno" misRMs={misRMs} fecha={fecha} />
 
-      {(dia?.contenido?.wods?.length > 0 || dia?.contenido?.fuerza?.length > 0) && (
+      {dia?.contenido?.wods?.length > 0 && (
         yoAusente ? (
           <Asistencia fecha={fecha} ausente />
         ) : (
           <>
-            <ResultForm
-              fecha={fecha}
-              wods={dia.contenido.wods || []}
-              fuerza={dia.contenido.fuerza || []}
-              existente={miResultado}
-              fuerzaExistente={miFuerzaHecha}
-            />
+            <ResultForm fecha={fecha} wods={dia.contenido.wods} existente={miResultado} />
             {!miResultado && <Asistencia fecha={fecha} ausente={false} />}
           </>
         )

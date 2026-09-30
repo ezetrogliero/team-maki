@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { guardarResultado } from '@/app/alumno/dia/[fecha]/actions';
 import { esPorTiempo, armarScore, segundosATiempo } from '@/lib/scoring';
 
-export default function ResultForm({ fecha, wods, fuerza = [], existente, fuerzaExistente }) {
+export default function ResultForm({ fecha, wods, existente }) {
   const [inputs, setInputs] = useState(() =>
     wods.map((w, wi) => {
       const prev = existente?.[wi];
@@ -17,7 +17,6 @@ export default function ResultForm({ fecha, wods, fuerza = [], existente, fuerza
       };
     })
   );
-  const [hechos, setHechos] = useState(() => ({ ...(fuerzaExistente || {}) }));
   const [nota, setNota] = useState('');
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState('');
@@ -33,7 +32,7 @@ export default function ResultForm({ fecha, wods, fuerza = [], existente, fuerza
       return;
     }
     startTransition(async () => {
-      const res = await guardarResultado(fecha, scores, nota, hechos);
+      const res = await guardarResultado(fecha, scores, nota);
       setMsg(res.error ? `Error: ${res.error}` : '¡Guardado! Ya podés ver el ranking del día.');
     });
   }
@@ -44,52 +43,6 @@ export default function ResultForm({ fecha, wods, fuerza = [], existente, fuerza
         <span className="plate blue" aria-hidden="true" />
         <h3>Cargar mis resultados</h3>
       </div>
-
-      {fuerza.length > 0 && (
-        <div className="ex" style={{ marginBottom: 10 }}>
-          <div className="exh"><h4>Fuerza — cuánto hiciste</h4></div>
-          <div className="small muted" style={{ marginBottom: 4 }}>
-            Opcional. Sirve para llevar el registro de tus pesos máximos usados por serie.
-          </div>
-          {fuerza.map((f, fi) => (
-            <div key={fi} style={{ marginBottom: 8 }}>
-              <div className="small" style={{ fontWeight: 700, marginBottom: 4 }}>{f.name}</div>
-              <div className="tw">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Series × reps</th>
-                      <th className="num">Carga</th>
-                      <th className="num">Hiciste</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {f.sets.map((s, si) => {
-                      const key = `${fi}-${si}`;
-                      return (
-                        <tr key={si}>
-                          <td>{s.s} × {s.r}</td>
-                          <td className="num">{s.c}{f.unit === '%' ? '%' : ' kg'}</td>
-                          <td className="num">
-                            <input
-                              className="num"
-                              inputMode="decimal"
-                              placeholder="kg"
-                              aria-label={`Peso que hiciste en ${s.s} × ${s.r} de ${f.name}`}
-                              value={hechos[key] ?? ''}
-                              onChange={(e) => setHechos((h) => ({ ...h, [key]: e.target.value }))}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {wods.map((w, wi) => (
         <div className="score" key={wi} style={{ marginBottom: 10 }}>
