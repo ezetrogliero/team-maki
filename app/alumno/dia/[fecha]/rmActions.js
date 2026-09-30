@@ -34,6 +34,14 @@ export async function guardarRM(fecha, lift, valorKgInput) {
 
   if (error) return { error: error.message };
 
+  // Historial para el gráfico de progresión (no rompe nada si falla).
+  await supabase.from('rm_historial').insert({
+    alumno_id: user.id,
+    ejercicio: lift,
+    valor_kg: valor,
+    fecha: new Date().toISOString().slice(0, 10),
+  });
+
   if (fecha) revalidatePath(`/alumno/dia/${fecha}`);
   revalidatePath('/alumno/progreso');
   return { ok: true, actualizado: true, valor_kg: valor };

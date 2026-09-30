@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { actualizarAlumno } from '@/app/coach/alumnos/actions';
 
-export default function AlumnoRow({ p }) {
+function chipEstado(p, estadoHoy) {
+  if (!p.activo) return <span className="chip">De baja</span>;
+  if (estadoHoy?.ausente) return <span className="chip">Ausente hoy</span>;
+  if (estadoHoy) return <span className="chip good">Cargó hoy</span>;
+  return <span className="chip warn">Sin cargar hoy</span>;
+}
+
+export default function AlumnoRow({ p, rmCount, totalLifts, estadoHoy, wodHoyNombre }) {
   const [nombre, setNombre] = useState(p.nombre);
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
@@ -40,7 +47,14 @@ export default function AlumnoRow({ p }) {
           style={{ flex: 1, minWidth: 100, padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 6, background: 'var(--surface2)' }}
         />
         <span className={`chip${p.rol === 'coach' ? ' rm' : ''}`}>{p.rol}</span>
+        {p.rol !== 'coach' && chipEstado(p, estadoHoy)}
       </div>
+      {p.rol !== 'coach' && totalLifts != null && (
+        <span className="s">
+          {rmCount} de {totalLifts} RM cargados
+          {estadoHoy?.score ? ` · ${wodHoyNombre || 'WOD'} ${estadoHoy.score}` : ''}
+        </span>
+      )}
       <span className="s">{p.email}</span>
       <div className="s" style={{ gridColumn: '1/-1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
         <button type="button" className="btn sm ghost" disabled={pending} onClick={guardarNombre}>

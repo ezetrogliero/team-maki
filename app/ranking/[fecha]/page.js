@@ -6,6 +6,7 @@ import { ordenarPorScore } from '@/lib/scoring';
 import { hoyFecha } from '@/lib/fecha';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import WeekStrip from '@/components/WeekStrip';
 
 export default async function Ranking({ params }) {
   const { fecha } = await params;
@@ -55,14 +56,23 @@ export default async function Ranking({ params }) {
     <Page fecha={fecha} volverHref={volverHref} rol={rol} hoy={hoy}>
       {wods.map((w, wi) => {
         const ordenados = ordenarPorScore(resultados || [], wi);
+        const descripcion = (w.items || [])
+          .map((it) => `${it.q}${unidadTexto(it.u)} ${it.ex}`.trim())
+          .filter(Boolean)
+          .join(' · ');
         return (
           <section className="block" key={wi}>
             <div className="bh">
               <span className="plate blue" aria-hidden="true" />
-              <h3>{wods.length > 1 ? `WOD ${wi + 1}` : 'Ranking'}</h3>
-              {w.name && <span className="pill">{w.name}</span>}
+              <h3>{w.name || (wods.length > 1 ? `WOD ${wi + 1}` : 'WOD del día')}</h3>
+              <span className="pill">{wodLabel(w)}</span>
             </div>
-            {ordenados.length === 0 ? (
+            {descripcion && <p className="small muted" style={{ margin: 0 }}>{descripcion}</p>}
+            {w.type === 'EMOM' ? (
+              <p className="small muted" style={{ margin: 0 }}>
+                Los EMOM no tienen ranking: el tiempo y las reps son iguales para todos.
+              </p>
+            ) : ordenados.length === 0 ? (
               <p className="small muted" style={{ margin: 0 }}>Todavía nadie cargó este WOD.</p>
             ) : (
               <ul className="rank">
@@ -87,10 +97,7 @@ function Page({ fecha, volverHref, rol, hoy, children }) {
     <div className="shell" style={{ paddingBottom: 84 }}>
       <Header />
       <Link href={volverHref} className="back small linkbtn">← Volver al día</Link>
-      <div className="phead">
-        <h2>Ranking</h2>
-        <span className="sub">{fecha}</span>
-      </div>
+      <WeekStrip fecha={fecha} basePath="/ranking" />
       {children}
       <BottomNav rol={rol} hoy={hoy} />
     </div>
@@ -104,4 +111,15 @@ function Empty({ texto, children }) {
       {children}
     </div>
   );
+}
+
+function unidadTexto(u) {
+  if (u === 'm') return ' m';
+  if (u === 'cal') return ' cal';
+  if (u === 'seg') return ' seg';
+  return '';
+}
+
+function wodLabel(w) {
+  return `${w.type}${w.time ? ` · ${w.time} min` : ''}`;
 }

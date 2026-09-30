@@ -41,6 +41,11 @@ export async function completarOnboarding(nombre, rms) {
         console.error('Error guardando RM en onboarding:', errRM.message);
         return { error: `Tu nombre se guardó, pero hubo un error con el RM (${errRM.message}). Podés cargarlo después.` };
       }
+
+      const hoy = new Date().toISOString().slice(0, 10);
+      await supabase.from('rm_historial').insert(
+        filas.map((f) => ({ alumno_id: user.id, ejercicio: f.lift, valor_kg: f.valor_kg, fecha: hoy }))
+      );
     }
 
     revalidatePath('/alumno');
