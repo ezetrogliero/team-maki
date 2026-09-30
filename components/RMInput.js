@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { guardarRM } from '@/app/alumno/dia/[fecha]/rmActions';
 
 export default function RMInput({ fecha, lift }) {
   const [valor, setValor] = useState('');
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState('');
+  const router = useRouter();
 
   function handleSave() {
     startTransition(async () => {
@@ -22,6 +24,7 @@ export default function RMInput({ fecha, lift }) {
           : 'Ya tenías un RM igual o mayor cargado, no se cambió.'
       );
       setValor('');
+      router.refresh();
     });
   }
 

@@ -3,11 +3,17 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { ordenarPorScore } from '@/lib/scoring';
+import { hoyFecha } from '@/lib/fecha';
+import Header from '@/components/Header';
+import BottomNav from '@/components/BottomNav';
 
 export default async function Ranking({ params }) {
   const { fecha } = await params;
   const { user, profile } = await requireUser();
   if (profile?.rol !== 'coach' && !profile?.onboarded) redirect('/alumno/onboarding');
+
+  const rol = profile?.rol === 'coach' ? 'coach' : 'alumno';
+  const hoy = hoyFecha();
 
   const supabase = await createClient();
   const { data: dia } = await supabase
@@ -20,7 +26,7 @@ export default async function Ranking({ params }) {
 
   if (!dia) {
     return (
-      <Page fecha={fecha} volverHref={volverHref}>
+      <Page fecha={fecha} volverHref={volverHref} rol={rol} hoy={hoy}>
         <Empty texto="Todavía no hay programación para este día." />
       </Page>
     );
@@ -28,14 +34,14 @@ export default async function Ranking({ params }) {
 
   const { data: resultados } = await supabase
     .from('resultados')
-    .select('alumno_id, wod, profiles(nombre)')
+    .select('alumno_id, wod, ausente, profiles(nombre)')
     .eq('dia_id', dia.id);
 
   const yoCargue = resultados?.some((r) => r.alumno_id === user.id);
 
   if (profile?.rol !== 'coach' && !yoCargue) {
     return (
-      <Page fecha={fecha} volverHref={volverHref}>
+      <Page fecha={fecha} volverHref={volverHref} rol={rol} hoy={hoy}>
         <Empty texto="Todavía no cargaste tus resultados de hoy. Cargalos primero para desbloquear el ranking del día.">
           <Link href={volverHref} className="btn">Ir a cargar mis resultados</Link>
         </Empty>
@@ -46,7 +52,7 @@ export default async function Ranking({ params }) {
   const wods = dia.contenido?.wods || [];
 
   return (
-    <Page fecha={fecha} volverHref={volverHref}>
+    <Page fecha={fecha} volverHref={volverHref} rol={rol} hoy={hoy}>
       {wods.map((w, wi) => {
         const ordenados = ordenarPorScore(resultados || [], wi);
         return (
@@ -76,15 +82,17 @@ export default async function Ranking({ params }) {
   );
 }
 
-function Page({ fecha, volverHref, children }) {
+function Page({ fecha, volverHref, rol, hoy, children }) {
   return (
-    <div className="shell">
+    <div className="shell" style={{ paddingBottom: 84 }}>
+      <Header />
       <Link href={volverHref} className="back small linkbtn">← Volver al día</Link>
       <div className="phead">
         <h2>Ranking</h2>
         <span className="sub">{fecha}</span>
       </div>
       {children}
+      <BottomNav rol={rol} hoy={hoy} />
     </div>
   );
 }

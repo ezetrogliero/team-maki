@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import AlumnoRow from '@/components/AlumnoRow';
@@ -15,8 +14,7 @@ export default async function Alumnos() {
     .order('nombre');
 
   return (
-    <div className="shell">
-      <Link href="/coach" className="back small linkbtn">← Volver</Link>
+    <>
       <div className="phead" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
         <h2>Alumnos</h2>
         <p className="small muted" style={{ margin: 0 }}>
@@ -33,6 +31,6 @@ export default async function Alumnos() {
           <AlumnoRow key={p.id} p={p} />
         ))}
       </div>
-    </div>
+    </>
   );
 }

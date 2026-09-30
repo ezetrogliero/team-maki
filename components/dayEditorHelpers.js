@@ -1,6 +1,6 @@
 const LIFTS = [
-  'Deadlift', 'Bench Press', 'Back Squat', 'Front Squat', 'Clean',
-  'Clean and Jerk', 'Squat Clean', 'Snatch', 'Squat Snatch',
+  'Deadlift', 'Bench Press', 'Back Squat', 'Front Squat', 'Clean', 'Power Clean',
+  'Clean and Jerk', 'Snatch', 'Power Snatch',
   'Shoulder Press', 'Push Press', 'Jerk', 'Split Jerk',
 ];
 

@@ -3,8 +3,8 @@ import { requireAlumno } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import DayView from '@/components/DayView';
 import ResultForm from '@/components/ResultForm';
+import Asistencia from '@/components/Asistencia';
 import WeekStrip from '@/components/WeekStrip';
-import Header from '@/components/Header';
 
 export default async function AlumnoDia({ params }) {
   const { fecha } = await params;
@@ -18,14 +18,16 @@ export default async function AlumnoDia({ params }) {
     .maybeSingle();
 
   let miResultado = null;
+  let yoAusente = false;
   if (dia) {
     const { data } = await supabase
       .from('resultados')
-      .select('wod')
+      .select('wod, ausente')
       .eq('dia_id', dia.id)
       .eq('alumno_id', user.id)
       .maybeSingle();
     miResultado = data?.wod || null;
+    yoAusente = !!data?.ausente;
   }
 
   let misRMs = {};
@@ -38,15 +40,21 @@ export default async function AlumnoDia({ params }) {
   }
 
   return (
-    <div className="shell">
-      <Header />
+    <>
       <WeekStrip fecha={fecha} basePath="/alumno/dia" />
       <p className="sub" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>{fecha}</p>
 
       <DayView contenido={dia?.contenido} nota={dia?.nota_coach} modo="alumno" misRMs={misRMs} fecha={fecha} />
 
       {dia?.contenido?.wods?.length > 0 && (
-        <ResultForm fecha={fecha} wods={dia.contenido.wods} existente={miResultado} />
+        yoAusente ? (
+          <Asistencia fecha={fecha} ausente />
+        ) : (
+          <>
+            <ResultForm fecha={fecha} wods={dia.contenido.wods} existente={miResultado} />
+            {!miResultado && <Asistencia fecha={fecha} ausente={false} />}
+          </>
+        )
       )}
 
       {dia && (
@@ -54,6 +62,6 @@ export default async function AlumnoDia({ params }) {
           Ver ranking del día →
         </Link>
       )}
-    </div>
+    </>
   );
 }

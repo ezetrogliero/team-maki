@@ -34,6 +34,7 @@ export async function guardarRM(fecha, lift, valorKgInput) {
 
   if (error) return { error: error.message };
 
-  revalidatePath(`/alumno/dia/${fecha}`);
+  if (fecha) revalidatePath(`/alumno/dia/${fecha}`);
+  revalidatePath('/alumno/progreso');
   return { ok: true, actualizado: true, valor_kg: valor };
 }

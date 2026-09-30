@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { hoyFecha } from '@/lib/fecha';
-import Header from '@/components/Header';
 
 export default async function CoachHome() {
   const { user, profile } = await requireUser();
@@ -11,9 +10,7 @@ export default async function CoachHome() {
   const hoy = hoyFecha();
 
   return (
-    <div className="shell">
-      <Header />
-
+    <>
       <section className="block">
         <p className="small muted" style={{ margin: 0 }}>Sesión de coach</p>
         <p style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 700 }}>{profile?.nombre || user.email}</p>
@@ -29,6 +26,6 @@ export default async function CoachHome() {
         </p>
         <Link href="/coach/alumnos" className="linkbtn">Ir al listado →</Link>
       </section>
-    </div>
+    </>
   );
 }
