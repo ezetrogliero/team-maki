@@ -23,6 +23,7 @@ export default async function EditarDia({ params }) {
 
       <div className="phead" style={{ justifyContent: 'center', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <h2>{fecha}</h2>
+        <Link href="/calendario" className="small linkbtn">Calendario →</Link>
       </div>
 
       <CoachDayScreen fecha={fecha} contenido={dia?.contenido || null} notaCoach={dia?.nota_coach || ''} />

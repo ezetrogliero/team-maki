@@ -42,7 +42,10 @@ export default async function AlumnoDia({ params }) {
   return (
     <>
       <WeekStrip fecha={fecha} basePath="/alumno/dia" />
-      <p className="sub" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>{fecha}</p>
+      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <p className="sub" style={{ fontWeight: 700, color: 'var(--ink)', margin: 0 }}>{fecha}</p>
+        <Link href="/calendario" className="small linkbtn">Calendario →</Link>
+      </div>
 
       <DayView contenido={dia?.contenido} nota={dia?.nota_coach} modo="alumno" misRMs={misRMs} fecha={fecha} />
 
