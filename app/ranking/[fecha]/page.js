@@ -76,13 +76,19 @@ export default async function Ranking({ params }) {
               <p className="small muted" style={{ margin: 0 }}>Todavía nadie cargó este WOD.</p>
             ) : (
               <ul className="rank">
-                {ordenados.map((r, i) => (
-                  <li key={r.alumno_id} className={`${i === 0 ? 'p1' : i === 1 ? 'p2' : i === 2 ? 'p3' : ''} ${r.alumno_id === user.id ? 'me' : ''}`}>
-                    <span className="pos">{i + 1}°</span>
-                    <span>{r.profiles?.nombre || '—'}</span>
-                    <span className="res">{r.wod[wi]?.texto}</span>
-                  </li>
-                ))}
+                {ordenados.map((r, i) => {
+                  const incompleto = r.wod[wi]?.completo === false || (r.wod[wi]?.modo === 'tiempo' && r.wod[wi]?.valor <= 0);
+                  return (
+                    <li
+                      key={r.alumno_id}
+                      className={`${!incompleto && i === 0 ? 'p1' : !incompleto && i === 1 ? 'p2' : !incompleto && i === 2 ? 'p3' : ''} ${r.alumno_id === user.id ? 'me' : ''}`}
+                    >
+                      <span className="pos">{incompleto ? '—' : `${i + 1}°`}</span>
+                      <span>{r.profiles?.nombre || '—'}</span>
+                      <span className="res">{incompleto ? 'No completó' : r.wod[wi]?.texto}</span>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
