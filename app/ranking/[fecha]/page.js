@@ -33,10 +33,18 @@ export default async function Ranking({ params }) {
     );
   }
 
-  const { data: resultados } = await supabase
+  const { data: resultadosRaw } = await supabase
     .from('resultados')
-    .select('alumno_id, wod, ausente, profiles(nombre)')
+    .select('alumno_id, wod, ausente')
     .eq('dia_id', dia.id);
+
+  let resultados = resultadosRaw || [];
+  if (resultados.length > 0) {
+    const ids = [...new Set(resultados.map((r) => r.alumno_id))];
+    const { data: perfiles } = await supabase.from('profiles').select('id, nombre').in('id', ids);
+    const nombrePorId = Object.fromEntries((perfiles || []).map((p) => [p.id, p.nombre]));
+    resultados = resultados.map((r) => ({ ...r, nombre: nombrePorId[r.alumno_id] || null }));
+  }
 
   const yoCargue = resultados?.some((r) => r.alumno_id === user.id);
 
@@ -84,7 +92,7 @@ export default async function Ranking({ params }) {
                       className={`${!incompleto && i === 0 ? 'p1' : !incompleto && i === 1 ? 'p2' : !incompleto && i === 2 ? 'p3' : ''} ${r.alumno_id === user.id ? 'me' : ''}`}
                     >
                       <span className="pos">{incompleto ? '—' : `${i + 1}°`}</span>
-                      <span>{r.profiles?.nombre || '—'}</span>
+                      <span>{r.nombre || 'Alumno'}</span>
                       <span className="res">{incompleto ? 'No completó' : r.wod[wi]?.texto}</span>
                     </li>
                   );
