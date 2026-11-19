@@ -7,6 +7,7 @@ import { hoyFecha } from '@/lib/fecha';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import WeekStrip from '@/components/WeekStrip';
+import { varianteDe } from '@/lib/variantes';
 
 export default async function Ranking({ params }) {
   const { fecha } = await params;
@@ -46,7 +47,8 @@ export default async function Ranking({ params }) {
     resultados = resultados.map((r) => ({ ...r, nombre: nombrePorId[r.alumno_id] || null }));
   }
 
-  const yoCargue = resultados?.some((r) => r.alumno_id === user.id);
+  const miVariante = varianteDe(dia.contenido, user.id);
+  const yoCargue = resultados?.some((r) => r.alumno_id === user.id) || !!miVariante?.sinWod;
 
   if (profile?.rol !== 'coach' && !yoCargue) {
     return (
@@ -59,6 +61,24 @@ export default async function Ranking({ params }) {
   }
 
   const wods = dia.contenido?.wods || [];
+  // Solo para la coach: quién todavía no cargó nada hoy (sin contar ausentes ni versiones sin WOD).
+  let sinCargar = [];
+  let sinWodNombres = [];
+  if (rol === 'coach' && wods.length > 0) {
+    const { data: activos } = await supabase
+      .from('profiles')
+      .select('id, nombre')
+      .eq('rol', 'alumno')
+      .eq('activo', true)
+      .eq('onboarded', true)
+      .order('nombre');
+    const conRegistro = new Set(resultados.map((r) => r.alumno_id));
+    (activos || []).forEach((a) => {
+      const v = varianteDe(dia.contenido, a.id);
+      if (v?.sinWod) sinWodNombres.push(a.nombre);
+      else if (!conRegistro.has(a.id)) sinCargar.push(a.nombre);
+    });
+  }
   const notasAlumnos = resultados.filter((r) => r.nota && r.nota.trim());
 
   return (
@@ -103,6 +123,23 @@ export default async function Ranking({ params }) {
           </section>
         );
       })}
+
+      {rol === 'coach' && wods.length > 0 && (
+        <section className="block">
+          <div className="bh">
+            <span className="plate yellow" aria-hidden="true" />
+            <h3>Sin cargar hoy</h3>
+          </div>
+          <p className="small" style={{ margin: 0 }}>
+            {sinCargar.length > 0 ? sinCargar.join(', ') : 'Cargaron todos. '}
+          </p>
+          {sinWodNombres.length > 0 && (
+            <p className="small muted" style={{ margin: 0 }}>
+              Versión alternativa sin WOD: {sinWodNombres.join(', ')}
+            </p>
+          )}
+        </section>
+      )}
 
       {rol === 'coach' && notasAlumnos.length > 0 && (
         <section className="block">

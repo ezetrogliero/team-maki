@@ -36,19 +36,32 @@ function ListBlock({ color, name, data }) {
   );
 }
 
-function FuerzaBlock({ bloques, modo, misRMs, fecha }) {
-  if (!bloques || bloques.length === 0) return null;
+// Muestra la carga tal cual la escribió la coach; si es solo un número, le agrega la unidad.
+function formatoCarga(c, unit) {
+  const t = String(c ?? '').trim();
+  if (!t) return '—';
+  if (/^[\d.,/]+$/.test(t)) return `${t}${unit === '%' ? '%' : ' kg'}`;
+  return t;
+}
+
+function FuerzaBlock({ bloques, modo, misRMs, fecha, etiqueta, descripcion }) {
+  const visibles = (bloques || []).filter((b) => b.name && b.name.trim());
+  if (visibles.length === 0) return null;
   const esAlumno = modo === 'alumno';
   return (
     <section className="block">
-      <BlockHead color="red" name="Fuerza" />
-      {bloques.map((b, bi) => {
+      <BlockHead color="red" name="Fuerza" meta={etiqueta} />
+      {descripcion && <p className="small muted" style={{ margin: 0 }}>{descripcion}</p>}
+      {visibles.map((b, bi) => {
         const lift = liftDe(b);
         const rm = lift ? misRMs?.[lift] : null;
-        const mostrarTeToca = esAlumno && b.unit === '%';
+        const mostrarTeToca = esAlumno && b.unit === '%' && !!lift;
+        const sets = (b.sets || []).filter((s) => s.s || s.r || String(s.c ?? '').trim());
 
         let sub = '';
-        if (b.unit === '%') {
+        if (b.unit === '%' && !lift) {
+          sub = 'Sin RM de referencia · usá el peso de tu variante';
+        } else if (b.unit === '%') {
           const base = b.acc ? `del RM de ${lift || '—'}` : 'del RM';
           sub = esAlumno
             ? rm != null
@@ -68,6 +81,7 @@ function FuerzaBlock({ bloques, modo, misRMs, fecha }) {
             </div>
             <div className="small muted">{sub}</div>
             <div className="tw">
+              {sets.length > 0 && (
               <table>
                 <thead>
                   <tr>
@@ -77,12 +91,12 @@ function FuerzaBlock({ bloques, modo, misRMs, fecha }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {b.sets.map((s, si) => {
+                  {sets.map((s, si) => {
                     const calc = mostrarTeToca && rm != null ? redondear25((rm * Number(s.c)) / 100) : null;
                     return (
                       <tr key={si}>
                         <td>{s.s} × {s.r}</td>
-                        <td className="num big">{s.c}{b.unit === '%' ? '%' : ' kg'}</td>
+                        <td className="num big">{formatoCarga(s.c, b.unit)}</td>
                         {mostrarTeToca && (
                           <td className="num big">{calc != null ? `${formatoKg(calc)} kg` : '—'}</td>
                         )}
@@ -91,6 +105,7 @@ function FuerzaBlock({ bloques, modo, misRMs, fecha }) {
                   })}
                 </tbody>
               </table>
+              )}
             </div>
             {esAlumno && lift && (b.rm || rm == null) && (
               <div className="rmbox">
@@ -166,7 +181,7 @@ function WodsBlock({ wods }) {
   );
 }
 
-export default function DayView({ contenido, nota, modo = 'coach', misRMs, fecha }) {
+export default function DayView({ contenido, nota, modo = 'coach', misRMs, fecha, nombres }) {
   if (!contenido) {
     return (
       <div className="empty">
@@ -178,8 +193,24 @@ export default function DayView({ contenido, nota, modo = 'coach', misRMs, fecha
     <div className="wodexp">
       <ListBlock color="green" name="Core" data={contenido.core} />
       <ListBlock color="yellow" name="Warm up" data={contenido.warm} />
-      <FuerzaBlock bloques={contenido.fuerza} modo={modo} misRMs={misRMs} fecha={fecha} />
+      <FuerzaBlock
+        bloques={contenido.fuerza}
+        modo={modo}
+        misRMs={misRMs}
+        fecha={fecha}
+        etiqueta={contenido.variante?.nombre}
+      />
       <WodsBlock wods={contenido.wods} />
+      {modo === 'coach' && !contenido.variante &&
+        (contenido.variantes || []).map((v) => (
+          <FuerzaBlock
+            key={v.id}
+            bloques={v.fuerza}
+            modo="coach"
+            etiqueta={v.nombre || 'Versión alternativa'}
+            descripcion={`Para: ${(v.alumnos || []).map((id) => nombres?.[id] || 'alumno').join(', ') || 'nadie asignado'}${v.sinWod ? ' · sin WOD' : ''}`}
+          />
+        ))}
       {nota && (
         <div className="note coachnote">
           <div className="small muted" style={{ marginBottom: 4, fontWeight: 700 }}>Nota de la coach</div>

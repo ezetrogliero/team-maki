@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DayView from './DayView';
 import DayEditor from './DayEditor';
 
-export default function CoachDayScreen({ fecha, contenido, notaCoach }) {
+export default function CoachDayScreen({ fecha, contenido, notaCoach, alumnos }) {
   const tieneDia = !!contenido;
   const [editing, setEditing] = useState(!tieneDia);
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function CoachDayScreen({ fecha, contenido, notaCoach }) {
             </button>
           )}
         </div>
-        <DayEditor fecha={fecha} initial={initial} onSaved={handleSaved} />
+        <DayEditor fecha={fecha} initial={initial} onSaved={handleSaved} alumnos={alumnos} />
       </div>
     );
   }
@@ -39,7 +39,7 @@ export default function CoachDayScreen({ fecha, contenido, notaCoach }) {
           Editar día
         </button>
       </div>
-      <DayView contenido={contenido} nota={notaCoach} />
+      <DayView contenido={contenido} nota={notaCoach} nombres={Object.fromEntries((alumnos || []).map((a) => [a.id, a.nombre]))} />
     </div>
   );
 }

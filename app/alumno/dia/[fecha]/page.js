@@ -5,6 +5,7 @@ import DayView from '@/components/DayView';
 import ResultForm from '@/components/ResultForm';
 import Asistencia from '@/components/Asistencia';
 import WeekStrip from '@/components/WeekStrip';
+import { contenidoParaAlumno } from '@/lib/variantes';
 
 export default async function AlumnoDia({ params }) {
   const { fecha } = await params;
@@ -16,6 +17,8 @@ export default async function AlumnoDia({ params }) {
     .select('id, contenido, nota_coach')
     .eq('fecha', fecha)
     .maybeSingle();
+
+  const contenido = dia ? contenidoParaAlumno(dia.contenido, user.id) : null;
 
   let miResultado = null;
   let yoAusente = false;
@@ -31,7 +34,7 @@ export default async function AlumnoDia({ params }) {
   }
 
   let misRMs = {};
-  if (dia?.contenido?.fuerza?.length > 0) {
+  if (contenido?.fuerza?.length > 0) {
     const { data: rms } = await supabase
       .from('rms')
       .select('lift, valor_kg')
@@ -47,14 +50,28 @@ export default async function AlumnoDia({ params }) {
         <Link href="/calendario" className="small linkbtn">Calendario →</Link>
       </div>
 
-      <DayView contenido={dia?.contenido} nota={dia?.nota_coach} modo="alumno" misRMs={misRMs} fecha={fecha} />
+      {contenido?.variante && (
+        <div className="banner" style={{ borderColor: 'var(--blue)' }}>
+          <span>
+            <strong>Hoy tenés versión alternativa</strong>
+            <br />
+            <span className="small muted">{contenido.variante.nombre || 'Versión alternativa'} · armada por tu coach</span>
+          </span>
+        </div>
+      )}
 
-      {dia?.contenido?.wods?.length > 0 && (
+      <DayView contenido={contenido} nota={dia?.nota_coach} modo="alumno" misRMs={misRMs} fecha={fecha} />
+
+      {contenido?.variante?.sinWod && (
+        <div className="note">Hoy no tenés WOD. No aparecés como pendiente ni en el ranking.</div>
+      )}
+
+      {contenido?.wods?.length > 0 && (
         yoAusente ? (
           <Asistencia fecha={fecha} ausente />
         ) : (
           <>
-            <ResultForm fecha={fecha} wods={dia.contenido.wods} existente={miResultado} />
+            <ResultForm fecha={fecha} wods={contenido.wods} existente={miResultado} />
             {!miResultado && <Asistencia fecha={fecha} ausente={false} />}
           </>
         )

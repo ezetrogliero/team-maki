@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { saveDia } from '@/app/coach/dia/actions';
-import { TPL, WOD_TYPES, ROUNDS_TYPES, LIFTS, normalizarFuerza } from './dayEditorHelpers';
+import { TPL, WOD_TYPES, ROUNDS_TYPES, LIFTS, uid, normalizarFuerza } from './dayEditorHelpers';
 
 function BlockHead({ color, name, children }) {
   return (
@@ -60,7 +60,7 @@ function RoundsBlock({ title, color, data, onChange }) {
   );
 }
 
-function FuerzaBlock({ bloques, onChange }) {
+function FuerzaBlock({ bloques, onChange, titulo = 'Fuerza' }) {
   function setBloque(i, patch) {
     onChange(bloques.map((b, idx) => (idx === i ? { ...b, ...patch } : b)));
   }
@@ -93,7 +93,7 @@ function FuerzaBlock({ bloques, onChange }) {
 
   return (
     <section className="edsec">
-      <BlockHead color="red" name="Fuerza" />
+      <BlockHead color="red" name={titulo} />
       {bloques.map((bRaw, bi) => {
         const b = normalizarFuerza(bRaw);
         return (
@@ -133,7 +133,7 @@ function FuerzaBlock({ bloques, onChange }) {
                     <label className="field">
                       RM base
                       <select value={b.base} onChange={(e) => setBloque(bi, { base: e.target.value })}>
-                        <option value="">Elegí…</option>
+                        <option value="">Sin RM (solo % o kg a mano)</option>
                         {LIFTS.map((l) => <option key={l} value={l}>{l}</option>)}
                       </select>
                     </label>
@@ -155,7 +155,7 @@ function FuerzaBlock({ bloques, onChange }) {
                 </>
               )}
             </div>
-            {b.acc && <span className="small muted">Los accesorios no suman a la progresión.</span>}
+            {b.acc && <span className="small muted">Los accesorios no suman a la progresión. En Carga podés escribir kilos o porcentaje (ej: 20 kg, 70%); "Te toca" solo aparece si elegís un RM base.</span>}
 
             <div className="colh" style={{ gridTemplateColumns: 'repeat(3,1fr) 34px' }}>
               <span>Series</span><span>Reps</span><span>{b.unit === '%' ? '% (30–110)' : 'Kg (H/M)'}</span><span></span>
@@ -165,13 +165,13 @@ function FuerzaBlock({ bloques, onChange }) {
                 <input inputMode="numeric" value={s.s} onChange={(e) => setSet(bi, si, { s: e.target.value })} aria-label="Series" />
                 <input inputMode="numeric" value={s.r} onChange={(e) => setSet(bi, si, { r: e.target.value })} aria-label="Reps" />
                 <input
-                  type={b.unit === '%' ? 'number' : 'text'}
-                  min={b.unit === '%' ? 30 : undefined}
-                  max={b.unit === '%' ? 110 : undefined}
-                  step={b.unit === '%' ? 5 : undefined}
+                  type={b.unit === '%' && !b.acc ? 'number' : 'text'}
+                  min={b.unit === '%' && !b.acc ? 30 : undefined}
+                  max={b.unit === '%' && !b.acc ? 110 : undefined}
+                  step={b.unit === '%' && !b.acc ? 5 : undefined}
                   value={s.c}
                   onChange={(e) => setSet(bi, si, { c: e.target.value })}
-                  placeholder={b.unit === '%' ? '70' : '40/30'}
+                  placeholder={b.acc ? '20 kg  o  70%' : b.unit === '%' ? '70' : '40/30'}
                   aria-label="Carga"
                 />
                 <button type="button" className="x" onClick={() => delSet(bi, si)} aria-label="Quitar serie">×</button>
@@ -281,15 +281,85 @@ function WodsBlock({ wods, onChange }) {
   );
 }
 
-export default function DayEditor({ fecha, initial, onSaved }) {
+function VariantesBlock({ variantes, alumnos, onChange }) {
+  function setVar(i, patch) {
+    onChange(variantes.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
+  }
+  function addVar() {
+    onChange([...variantes, { id: uid(), nombre: '', alumnos: [], sinWod: false, fuerza: [TPL.fuerza()] }]);
+  }
+  function delVar(i) {
+    onChange(variantes.filter((_, idx) => idx !== i));
+  }
+  // Un alumno solo puede estar en una versión: al tildarlo acá se lo saca de las otras.
+  function toggleAlumno(i, id) {
+    onChange(
+      variantes.map((v, idx) => {
+        const sin = (v.alumnos || []).filter((a) => a !== id);
+        if (idx !== i) return { ...v, alumnos: sin };
+        return { ...v, alumnos: (v.alumnos || []).includes(id) ? sin : [...sin, id] };
+      })
+    );
+  }
+
+  return (
+    <section className="edsec">
+      <BlockHead color="blue" name="Versiones alternativas" />
+      <span className="small muted">
+        Para alumnos que hacen otra fuerza (por ejemplo una lesión). Ellos ven directo su versión; el resto ve el día normal.
+      </span>
+      {variantes.map((v, vi) => (
+        <div className="fzed" key={v.id} style={{ borderColor: 'var(--blue)' }}>
+          <div className="edrow" style={{ gridTemplateColumns: '1fr 34px' }}>
+            <input
+              value={v.nombre}
+              onChange={(e) => setVar(vi, { nombre: e.target.value })}
+              placeholder="Nombre de la versión (ej: Lesión hombro)"
+              aria-label="Nombre de la versión"
+            />
+            <button type="button" className="x" onClick={() => delVar(vi)} aria-label="Quitar versión">×</button>
+          </div>
+          <FuerzaBlock
+            titulo="Fuerza de esta versión"
+            bloques={v.fuerza}
+            onChange={(fuerza) => setVar(vi, { fuerza })}
+          />
+          <div className="small muted" style={{ fontWeight: 600 }}>¿A quién le toca?</div>
+          {(alumnos || []).length === 0 && <span className="small muted">Todavía no hay alumnos activos.</span>}
+          {(alumnos || []).map((a) => (
+            <label className="check" key={a.id}>
+              <input type="checkbox" checked={(v.alumnos || []).includes(a.id)} onChange={() => toggleAlumno(vi, a.id)} />
+              {a.nombre}
+            </label>
+          ))}
+          <label className="check">
+            <input type="checkbox" checked={!!v.sinWod} onChange={(e) => setVar(vi, { sinWod: e.target.checked })} />
+            Sin WOD para esta versión
+          </label>
+        </div>
+      ))}
+      <button type="button" className="add" onClick={addVar}>+ Agregar versión alternativa</button>
+    </section>
+  );
+}
+
+export default function DayEditor({ fecha, initial, onSaved, alumnos }) {
   const [data, setData] = useState(() =>
     initial
-      ? { ...initial, fuerza: (initial.fuerza || []).map(normalizarFuerza) }
+      ? {
+          ...initial,
+          fuerza: (initial.fuerza || []).map(normalizarFuerza),
+          variantes: (initial.variantes || []).map((v) => ({
+            ...v,
+            fuerza: (v.fuerza || []).map(normalizarFuerza),
+          })),
+        }
       : {
           core: TPL.core(),
           warm: TPL.core(),
           fuerza: [],
           wods: [TPL.wod()],
+          variantes: [],
           nota: '',
         }
   );
@@ -315,6 +385,11 @@ export default function DayEditor({ fecha, initial, onSaved }) {
       <RoundsBlock title="Warm up" color="yellow" data={data.warm} onChange={(warm) => setData({ ...data, warm })} />
       <FuerzaBlock bloques={data.fuerza} onChange={(fuerza) => setData({ ...data, fuerza })} />
       <WodsBlock wods={data.wods} onChange={(wods) => setData({ ...data, wods })} />
+      <VariantesBlock
+        variantes={data.variantes || []}
+        alumnos={alumnos}
+        onChange={(variantes) => setData({ ...data, variantes })}
+      />
 
       <section className="edsec">
         <label className="field">

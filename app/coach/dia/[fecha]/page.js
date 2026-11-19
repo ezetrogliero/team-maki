@@ -17,6 +17,13 @@ export default async function EditarDia({ params }) {
     .eq('fecha', fecha)
     .maybeSingle();
 
+  const { data: alumnosData } = await supabase
+    .from('profiles')
+    .select('id, nombre')
+    .eq('rol', 'alumno')
+    .eq('activo', true)
+    .order('nombre');
+
   return (
     <>
       <WeekStrip fecha={fecha} basePath="/coach/dia" />
@@ -26,7 +33,7 @@ export default async function EditarDia({ params }) {
         <Link href="/calendario" className="small linkbtn">Calendario →</Link>
       </div>
 
-      <CoachDayScreen fecha={fecha} contenido={dia?.contenido || null} notaCoach={dia?.nota_coach || ''} />
+      <CoachDayScreen fecha={fecha} contenido={dia?.contenido || null} notaCoach={dia?.nota_coach || ''} alumnos={alumnosData || []} />
 
       {dia && (
         <Link href={`/ranking/${fecha}`} className="btn ghost full">
