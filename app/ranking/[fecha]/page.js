@@ -35,7 +35,7 @@ export default async function Ranking({ params }) {
 
   const { data: resultadosRaw } = await supabase
     .from('resultados')
-    .select('alumno_id, wod, ausente')
+    .select('alumno_id, wod, ausente, nota')
     .eq('dia_id', dia.id);
 
   let resultados = resultadosRaw || [];
@@ -59,6 +59,7 @@ export default async function Ranking({ params }) {
   }
 
   const wods = dia.contenido?.wods || [];
+  const notasAlumnos = resultados.filter((r) => r.nota && r.nota.trim());
 
   return (
     <Page fecha={fecha} volverHref={volverHref} rol={rol} hoy={hoy}>
@@ -102,6 +103,23 @@ export default async function Ranking({ params }) {
           </section>
         );
       })}
+
+      {rol === 'coach' && notasAlumnos.length > 0 && (
+        <section className="block">
+          <div className="bh">
+            <span className="plate blue" aria-hidden="true" />
+            <h3>Notas de los alumnos</h3>
+          </div>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {notasAlumnos.map((r) => (
+              <li key={r.alumno_id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: '10px 12px' }}>
+                <strong className="small">{r.nombre || 'Alumno'}</strong>
+                <p style={{ margin: '4px 0 0' }}>{r.nota}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </Page>
   );
 }
